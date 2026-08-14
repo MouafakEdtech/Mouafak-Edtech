@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Conjugation Whack-a-Mole | Mouafak Edtech</title>
+<style>
+  :root{
+    --navy:#0D1B2A;
+    --blue:#2563EB;
+    --purple:#7C3AED;
+    --cyan:#22D3EE;
+    --white:#FFFFFF;
+    --lightgray:#FBFAFC;
+    --green:#16A34A;
+    --red:#DC2626;
+    --radius-lg: 1.5vw;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent; user-select:none;}
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(124,58,237,0.08), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(34,211,238,0.10), transparent 40%),
+      var(--lightgray);
+    font-family:'Poppins', 'Segoe UI', sans-serif;
+    color:var(--navy);
+    overflow:hidden;
+  }
+
+  @font-face{
+    font-family:'Poppins';
+    src: local('Poppins');
+  }
+
+  .app{
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    width:100vw;
+    padding: 1.4vh 1.6vw;
+    gap: 1vh;
+  }
+
+  /* ---------------- HEADER ---------------- */
+  header.top{
+    background: var(--navy);
+    border-radius: 1.2vw;
+    padding: 1.4vh 2vw;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1.5vw;
+    box-shadow: 0 0.6vh 0 rgba(0,0,0,0.08);
+    flex-wrap: wrap;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap: 0.8vw;
+    flex-shrink:0;
+  }
+  .brand .logo-badge{
+    width: 5.2vh; height:5.2vh;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.6vh;
+    flex-shrink:0;
+    box-shadow: inset 0 0 0 0.3vh rgba(255,255,255,0.25);
+  }
+  .brand-text h1{
+    margin:0;
+    color:var(--white);
+    font-size: clamp(14px, 1.9vw, 26px);
+    font-weight:700;
+    letter-spacing:0.2px;
+    line-height:1.1;
+  }
+  .brand-text span{
+    color: var(--cyan);
+    font-size: clamp(9px, 0.85vw, 13px);
+    font-weight:600;
+    letter-spacing: 0.06em;
+    text-transform:uppercase;
+  }
+
+  .target-instruction{
+    flex:1 1 260px;
+    text-align:center;
+    color:var(--white);
+  }
+  .target-instruction .label{
+    font-size: clamp(9px,0.8vw,12px);
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color: var(--cyan);
+    font-weight:700;
+  }
+  .target-instruction .tense{
+    font-size: clamp(16px, 2.4vw, 30px);
+    font-weight:800;
+    color:var(--white);
+    line-height:1.15;
+  }
+  .target-instruction .tense b{ color: var(--cyan); }
+
+  .stats{
+    display:flex;
+    gap: 1.2vw;
+    align-items:center;
+    flex-shrink:0;
+  }
+  .stat-box{
+    background: rgba(255,255,255,0.08);
+    border: 0.15vh solid rgba(255,255,255,0.15);
+    border-radius: 0.9vw;
+    padding: 0.8vh 1.3vw;
+    text-align:center;
+    min-width: 6.5vw;
+  }
+  .stat-box .num{
+    color: var(--white);
+    font-weight:800;
+    font-size: clamp(18px, 2.4vw, 32px);
+    line-height:1;
+  }
+  .stat-box.score .num{ color: var(--cyan); }
+  .stat-box .lbl{
+    color: rgba(255,255,255,0.65);
+    font-size: clamp(8px,0.65vw,11px);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    font-weight:600;
+    margin-top:0.3vh;
+  }
+
+  .icon-btn{
+    background: var(--purple);
+    border:none;
+    color:var(--white);
+    width: 5.4vh; height:5.4vh;
+    border-radius: 50%;
+    font-size: 2.2vh;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition: transform .15s ease, background .15s ease;
+    flex-shrink:0;
+  }
+  .icon-btn:hover{ background: var(--blue); transform: scale(1.06); }
+  .icon-btn:active{ transform: scale(0.94); }
+
+  /* Timer bar */
+  .timer-wrap{
+    background: var(--navy);
+    border-radius: 1vw;
+    padding: 0.8vh 1.6vw;
+    display:flex;
+    align-items:center;
+    gap: 1vw;
+    box-shadow: 0 0.4vh 0 rgba(0,0,0,0.06);
+  }
+  .timer-track{
+    flex:1;
+    height: 1.6vh;
+    background: rgba(255,255,255,0.12);
+    border-radius: 1vh;
+    overflow:hidden;
+    position:relative;
+  }
+  .timer-fill{
+    height:100%;
+    width:100%;
+    border-radius: 1vh;
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+    transition: width 1s linear, background .3s ease;
+  }
+  .timer-fill.warn{ background: linear-gradient(90deg, #FBBF24, var(--red)); }
+  .timer-num{
+    color:var(--white);
+    font-weight:700;
+    font-size: clamp(13px, 1.3vw, 18px);
+    min-width: 3.4em;
+    text-align:right;
+  }
+
+  /* ---------------- GAME BOARD ---------------- */
+  main.board-area{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+    position:relative;
+  }
+
+  .field{
+    width:100%;
+    height:100%;
+    max-width: 1200px;
+    background:
+      radial-gradient(ellipse at 50% 15%, rgba(37,99,235,0.06), transparent 60%),
+      var(--white);
+    border-radius: 1.6vw;
+    border: 0.2vh solid rgba(13,27,42,0.06);
+    box-shadow: 0 1vh 2.5vh rgba(13,27,42,0.08);
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2.2vh 2vw;
+    padding: 3vh 3vw;
+  }
+  .field.shake{
+    animation: shakeField 0.4s ease;
+  }
+  @keyframes shakeField{
+    0%,100%{ transform: translateX(0); }
+    20%{ transform: translateX(-1.2vw); }
+    40%{ transform: translateX(1.2vw); }
+    60%{ transform: translateX(-0.8vw); }
+    80%{ transform: translateX(0.8vw); }
+  }
+  .field.flash-error{
+    box-shadow: 0 0 0 0.5vh var(--red) inset, 0 1vh 2.5vh rgba(220,38,38,0.25);
+  }
+
+  .hole{
+    position:relative;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 40%, #E7E4FB 0%, #D8D3F5 40%, #C9C2ED 70%, #b6adde 100%);
+    box-shadow:
+      inset 0 0.8vh 1.6vh rgba(13,27,42,0.35),
+      inset 0 -0.4vh 0.6vh rgba(255,255,255,0.5),
+      0 0.4vh 0 rgba(13,27,42,0.05);
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    cursor:default;
+  }
+  .hole::before{
+    content:"";
+    position:absolute;
+    bottom:0; left:8%; right:8%;
+    height:28%;
+    background: radial-gradient(ellipse at center, rgba(13,27,42,0.28), transparent 75%);
+    border-radius:50%;
+  }
+
+  .mole{
+    position:absolute;
+    bottom:-100%;
+    left:50%;
+    transform: translateX(-50%);
+    width:88%;
+    max-width: 220px;
+    min-height: 58%;
+    border-radius: 1.2vw;
+    background: linear-gradient(160deg, var(--blue), var(--purple));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:var(--white);
+    font-weight:800;
+    font-size: clamp(15px, 2vw, 26px);
+    padding: 1vh 0.6vw 1.6vh;
+    cursor:pointer;
+    transition: bottom 0.35s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 0.6vh 1.4vh rgba(13,27,42,0.25);
+    z-index:2;
+    line-height:1.15;
+    letter-spacing: 0.01em;
+  }
+  .mole.up{
+    bottom: 6%;
+  }
+  .mole:active{ transform: translateX(-50%) scale(0.94); }
+
+  .mole.correct-anim{
+    background: linear-gradient(160deg, #34D399, var(--green));
+    animation: popCorrect 0.35s ease forwards;
+  }
+  .mole.wrong-anim{
+    background: linear-gradient(160deg, #F87171, var(--red));
+    animation: shakeMole 0.4s ease;
+  }
+  @keyframes popCorrect{
+    0%{ transform: translateX(-50%) scale(1); }
+    50%{ transform: translateX(-50%) scale(1.15); }
+    100%{ transform: translateX(-50%) scale(0.2); opacity:0; bottom:60%; }
+  }
+  @keyframes shakeMole{
+    0%,100%{ transform: translateX(-50%); }
+    25%{ transform: translateX(-58%); }
+    50%{ transform: translateX(-42%); }
+    75%{ transform: translateX(-56%); }
+  }
+
+  .floater{
+    position:absolute;
+    left:50%;
+    top:10%;
+    transform: translateX(-50%);
+    font-weight:800;
+    font-size: clamp(18px, 2.6vw, 34px);
+    pointer-events:none;
+    z-index:5;
+    animation: floatUp 0.9s ease forwards;
+  }
+  .floater.plus{ color: var(--green); text-shadow: 0 0.2vh 0 rgba(255,255,255,0.8); }
+  .floater.minus{ color: var(--red); text-shadow: 0 0.2vh 0 rgba(255,255,255,0.8); }
+  @keyframes floatUp{
+    0%{ opacity:0; transform: translateX(-50%) translateY(0) scale(0.7); }
+    20%{ opacity:1; transform: translateX(-50%) translateY(-1vh) scale(1.1); }
+    100%{ opacity:0; transform: translateX(-50%) translateY(-9vh) scale(1); }
+  }
+
+  /* ---------------- START / OVERLAYS ---------------- */
+  .overlay{
+    position:fixed; inset:0;
+    background: linear-gradient(160deg, rgba(13,27,42,0.96), rgba(37,17,80,0.96));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding: 3vh 4vw;
+    backdrop-filter: blur(3px);
+  }
+  .overlay.hidden{ display:none; }
+  .panel{
+    background: var(--white);
+    border-radius: 1.8vw;
+    padding: 4vh 4vw;
+    max-width: 640px;
+    width:100%;
+    text-align:center;
+    box-shadow: 0 2vh 6vh rgba(0,0,0,0.4);
+    max-height: 92vh;
+    overflow-y:auto;
+  }
+  .panel .badge{
+    display:inline-flex; align-items:center; gap:0.5em;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color:var(--white);
+    padding: 0.6em 1.2em;
+    border-radius: 999px;
+    font-size: clamp(10px,1vw,13px);
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom: 1.4vh;
+  }
+  .panel h2{
+    margin: 0.2em 0 0.3em;
+    color: var(--navy);
+    font-size: clamp(22px, 3vw, 38px);
+    font-weight:800;
+  }
+  .panel p.sub{
+    color:#5b6b82;
+    font-size: clamp(13px,1.1vw,16px);
+    margin:0 0 2.2vh;
+    line-height:1.5;
+  }
+
+  .tense-select{
+    display:flex; flex-wrap:wrap; gap:0.8vw; justify-content:center; margin-bottom:2.2vh;
+  }
+  .tense-chip{
+    border: 0.2vh solid #D8D3F5;
+    background: var(--lightgray);
+    color: var(--navy);
+    padding: 1vh 1.6vw;
+    border-radius: 999px;
+    font-weight:700;
+    font-size: clamp(12px,1vw,15px);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .tense-chip.active{
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border-color: transparent;
+    color:var(--white);
+    box-shadow: 0 0.5vh 1vh rgba(124,58,237,0.3);
+  }
+
+  .btn-primary{
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: var(--white);
+    border:none;
+    padding: 1.4vh 3vw;
+    font-size: clamp(15px,1.3vw,19px);
+    font-weight:800;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 0.8vh 1.6vh rgba(37,99,235,0.35);
+    transition: transform .15s ease;
+  }
+  .btn-primary:hover{ transform: translateY(-2px); }
+  .btn-primary:active{ transform: translateY(0px) scale(0.97); }
+
+  .btn-secondary{
+    background: var(--lightgray);
+    color: var(--navy);
+    border: 0.2vh solid #D8D3F5;
+    padding: 1.1vh 2vw;
+    font-size: clamp(12px,1vw,14px);
+    font-weight:700;
+    border-radius: 999px;
+    cursor:pointer;
+    margin-top: 1.4vh;
+  }
+
+  /* results */
+  .final-score{
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight:800;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1;
+    margin: 0.6vh 0 0.2vh;
+  }
+  .final-stats{
+    display:flex; justify-content:center; gap:2.4vw; margin: 2vh 0 2.4vh;
+    flex-wrap:wrap;
+  }
+  .final-stats div{
+    text-align:center;
+  }
+  .final-stats .n{ font-size: clamp(20px,2vw,28px); font-weight:800; color:var(--navy); }
+  .final-stats .l{ font-size: clamp(9px,0.8vw,12px); color:#7a8aa0; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; }
+
+  /* manage verbs panel */
+  .verb-manager{ text-align:left; }
+  .set-list{
+    display:flex; flex-direction:column; gap: 1vh;
+    max-height: 34vh; overflow-y:auto;
+    margin-bottom: 1.6vh;
+    padding-right: 0.3vw;
+  }
+  .set-row{
+    display:flex; align-items:center; gap:0.8vw;
+    background: var(--lightgray);
+    border: 0.15vh solid #EAE6FB;
+    border-radius: 0.8vw;
+    padding: 1vh 1vw;
+  }
+  .set-row input[type=text]{
+    flex:1;
+    border: 0.15vh solid #D8D3F5;
+    border-radius: 0.5vw;
+    padding: 0.8vh 0.7vw;
+    font-family:inherit;
+    font-size: clamp(12px,0.95vw,14px);
+  }
+  .set-row .del{
+    background: var(--red);
+    color:#fff;
+    border:none;
+    width: 3.2vh; height:3.2vh;
+    border-radius:50%;
+    cursor:pointer;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .field-label{
+    font-size: clamp(9px,0.75vw,11px);
+    color:#7a8aa0;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    display:block;
+    margin-bottom:0.3vh;
+  }
+  .add-verb-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 0.7vw;
+    margin-bottom:1.6vh;
+    align-items:end;
+  }
+  .add-verb-row input{
+    border: 0.15vh solid #D8D3F5;
+    border-radius: 0.6vw;
+    padding: 1vh 0.7vw;
+    font-family:inherit;
+    font-size: clamp(12px,0.95vw,14px);
+    width:100%;
+  }
+  .add-verb-row button{
+    background: var(--green);
+    color:#fff;
+    border:none;
+    border-radius: 0.6vw;
+    padding: 1vh 1vw;
+    font-weight:800;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .panel-actions{
+    display:flex;
+    gap: 1vw;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top: 1vh;
+  }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:#D8D3F5; border-radius:8px; }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo-badge"> <img src="logo.png"  width="40" height="40"></div>
+      <div class="brand-text">
+        <h1>Conjugation Whack-a-Mole</h1>
+        <span>Mouafak Edtech</span>
+      </div>
+    </div>
+
+    <div class="target-instruction">
+      <div class="label">Hit the correct forms</div>
+      <div class="tense">Hit only the <b id="tenseLabel">PAST TENSE</b> verbs!</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-box score">
+        <div class="num" id="scoreNum">0</div>
+        <div class="lbl">Score</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="streakNum">0</div>
+        <div class="lbl">Streak</div>
+      </div>
+      <button class="icon-btn" id="manageBtn" title="Manage verb lists">📝</button>
+      <button class="icon-btn" id="restartBtn" title="Restart">↻</button>
+    </div>
+  </header>
+
+  <div class="timer-wrap">
+    <div class="timer-track">
+      <div class="timer-fill" id="timerFill"></div>
+    </div>
+    <div class="timer-num" id="timerNum">45s</div>
+  </div>
+
+  <main class="board-area">
+    <div class="field" id="field">
+      <div class="hole" data-hole="0"></div>
+      <div class="hole" data-hole="1"></div>
+      <div class="hole" data-hole="2"></div>
+      <div class="hole" data-hole="3"></div>
+      <div class="hole" data-hole="4"></div>
+      <div class="hole" data-hole="5"></div>
+    </div>
+  </main>
+</div>
+
+<!-- START OVERLAY -->
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="badge"><img src="logo.png"  width="30" height="30"> AI &amp; EdTech Game</div>
+    <h2>Conjugation Whack-a-Mole</h2>
+    <p class="sub">Pick a target tense, then whack every mole showing the <b>correct</b> conjugation before time runs out. Wrong words cost you points!</p>
+
+    <span class="field-label">Choose target tense</span>
+    <div class="tense-select" id="tenseSelect"></div>
+
+    <button class="btn-primary" id="startBtn">▶ Start Game (45s)</button>
+    <br>
+    <button class="btn-secondary" id="openManageFromStart">📝 Manage Verb Lists</button>
+  </div>
+</div>
+
+<!-- RESULTS OVERLAY -->
+<div class="overlay hidden" id="resultOverlay">
+  <div class="panel">
+    <div class="badge" id="resultBadge">Round Complete</div>
+    <h2 id="resultTitle">Great Job!</h2>
+    <div class="final-score" id="finalScore">0</div>
+    <p class="sub">points scored</p>
+    <div class="final-stats">
+      <div><div class="n" id="statCorrect">0</div><div class="l">Correct Hits</div></div>
+      <div><div class="n" id="statWrong">0</div><div class="l">Wrong Hits</div></div>
+      <div><div class="n" id="statBestStreak">0</div><div class="l">Best Streak</div></div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" id="playAgainBtn">🔁 Play Again</button>
+      <button class="btn-secondary" id="changeTenseBtn">Change Tense</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE VERBS OVERLAY -->
+<div class="overlay hidden" id="manageOverlay">
+  <div class="panel verb-manager">
+    <div class="badge">Verb Library</div>
+    <h2 style="text-align:center;">Manage Verb Lists</h2>
+    <p class="sub" style="text-align:center;">Add your own verbs per tense. Each entry needs a base verb, the correct form, and one common student mistake (distractor).</p>
+
+    <span class="field-label">Editing tense:</span>
+    <div class="tense-select" id="manageTenseSelect" style="justify-content:flex-start;"></div>
+
+    <span class="field-label" style="margin-top:1.2vh;">Add a new verb</span>
+    <div class="add-verb-row">
+      <input type="text" id="newBase" placeholder="Base verb (go)">
+      <input type="text" id="newCorrect" placeholder="Correct (went)">
+      <input type="text" id="newWrong" placeholder="Wrong (goed)">
+      <button id="addVerbBtn">+ Add</button>
+    </div>
+
+    <span class="field-label">Current list</span>
+    <div class="set-list" id="setList"></div>
+
+    <div class="panel-actions">
+      <button class="btn-secondary" id="resetVerbsBtn">Reset to Defaults</button>
+      <button class="btn-primary" id="closeManageBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= DEFAULT VERB MATRIX ================= */
+  // Each tense has a list of entries: { base, correct, wrong }
+  const DEFAULT_VERBS = {
+    "PAST TENSE": [
+      { base:"go",   correct:"went",    wrong:"goed" },
+      { base:"eat",  correct:"ate",     wrong:"eated" },
+      { base:"see",  correct:"saw",     wrong:"seed" },
+      { base:"take", correct:"took",    wrong:"taked" },
+      { base:"buy",  correct:"bought",  wrong:"buyed" },
+      { base:"write",correct:"wrote",   wrong:"writed" },
+      { base:"run",  correct:"ran",     wrong:"runned" },
+      { base:"speak",correct:"spoke",   wrong:"speaked" },
+      { base:"drink",correct:"drank",   wrong:"drinked" },
+      { base:"come", correct:"came",    wrong:"comed" },
+      { base:"give", correct:"gave",    wrong:"gived" },
+      { base:"think",correct:"thought", wrong:"thinked" }
+    ],
+    "PRESENT SIMPLE": [
+      { base:"go",   correct:"goes",   wrong:"go" },
+      { base:"do",   correct:"does",   wrong:"do" },
+      { base:"have", correct:"has",    wrong:"haves" },
+      { base:"watch",correct:"watches",wrong:"watchs" },
+      { base:"study",correct:"studies",wrong:"studys" },
+      { base:"play", correct:"plays",  wrong:"plaies" },
+      { base:"fix",  correct:"fixes",  wrong:"fixs" },
+      { base:"try",  correct:"tries",  wrong:"trys" },
+      { base:"wash", correct:"washes", wrong:"washs" },
+      { base:"carry",correct:"carries",wrong:"carrys" }
+    ],
+    "PRESENT CONTINUOUS": [
+      { base:"run",  correct:"running",  wrong:"runing" },
+      { base:"write",correct:"writing",  wrong:"writeing" },
+      { base:"sit",  correct:"sitting",  wrong:"siting" },
+      { base:"make", correct:"making",   wrong:"makeing" },
+      { base:"swim", correct:"swimming", wrong:"swiming" },
+      { base:"lie",  correct:"lying",    wrong:"liing" },
+      { base:"begin",correct:"beginning",wrong:"begining" },
+      { base:"study",correct:"studying", wrong:"studing" }
+    ],
+    "FUTURE (WILL)": [
+      { base:"go",   correct:"will go",   wrong:"will goes" },
+      { base:"eat",  correct:"will eat",  wrong:"will eats" },
+      { base:"see",  correct:"will see",  wrong:"will saw" },
+      { base:"come", correct:"will come", wrong:"will comes" },
+      { base:"do",   correct:"will do",   wrong:"will does" },
+      { base:"be",   correct:"will be",   wrong:"will is" }
+    ],
+    "PAST PARTICIPLE": [
+      { base:"go",   correct:"gone",    wrong:"went" },
+      { base:"eat",  correct:"eaten",   wrong:"ate" },
+      { base:"see",  correct:"seen",    wrong:"saw" },
+      { base:"take", correct:"taken",   wrong:"took" },
+      { base:"write",correct:"written", wrong:"wrote" },
+      { base:"speak",correct:"spoken",  wrong:"spoke" },
+      { base:"break",correct:"broken",  wrong:"broke" },
+      { base:"give", correct:"given",   wrong:"gave" }
+    ]
+  };
+
+  const STORAGE_KEY = "mouafak_wam_verbs_v1";
+
+  function loadVerbs(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        // merge to ensure all default tenses exist even if storage is partial
+        return Object.assign({}, DEFAULT_VERBS, parsed);
+      }
+    }catch(e){ /* ignore */ }
+    return JSON.parse(JSON.stringify(DEFAULT_VERBS));
+  }
+  function saveVerbs(v){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); }catch(e){ /* ignore */ }
+  }
+
+  let VERBS = loadVerbs();
+  let currentTense = Object.keys(VERBS)[0];
+  let manageTense = currentTense;
+
+  /* ================= GAME STATE ================= */
+  const ROUND_SECONDS = 45;
+  const MOLE_VISIBLE_MS = 1800;
+  const SPAWN_INTERVAL_MS = 1100;
+
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let correctHits = 0;
+  let wrongHits = 0;
+  let timeLeft = ROUND_SECONDS;
+  let spawnTimerId = null;
+  let countdownTimerId = null;
+  let running = false;
+
+  // Track per-hole state: {occupied, timeoutId, wordEl, isCorrect}
+  const holeState = [null,null,null,null,null,null];
+
+  /* ================= DOM ================= */
+  const scoreNum = document.getElementById('scoreNum');
+  const streakNum = document.getElementById('streakNum');
+  const tenseLabel = document.getElementById('tenseLabel');
+  const timerFill = document.getElementById('timerFill');
+  const timerNum = document.getElementById('timerNum');
+  const field = document.getElementById('field');
+  const holes = Array.from(document.querySelectorAll('.hole'));
+
+  const startOverlay = document.getElementById('startOverlay');
+  const resultOverlay = document.getElementById('resultOverlay');
+  const manageOverlay = document.getElementById('manageOverlay');
+
+  const tenseSelect = document.getElementById('tenseSelect');
+  const manageTenseSelect = document.getElementById('manageTenseSelect');
+  const setList = document.getElementById('setList');
+
+  /* ================= TENSE CHIP RENDER ================= */
+  function renderTenseChips(container, selected, onSelect){
+    container.innerHTML = '';
+    Object.keys(VERBS).forEach(t=>{
+      const chip = document.createElement('button');
+      chip.className = 'tense-chip' + (t===selected ? ' active' : '');
+      chip.textContent = t;
+      chip.type = 'button';
+      chip.addEventListener('click', ()=>{
+        onSelect(t);
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  function refreshStartChips(){
+    renderTenseChips(tenseSelect, currentTense, (t)=>{
+      currentTense = t;
+      refreshStartChips();
+    });
+  }
+  function refreshManageChips(){
+    renderTenseChips(manageTenseSelect, manageTense, (t)=>{
+      manageTense = t;
+      refreshManageChips();
+      renderSetList();
+    });
+  }
+
+  /* ================= MANAGE VERBS UI ================= */
+  function renderSetList(){
+    setList.innerHTML = '';
+    const list = VERBS[manageTense] || [];
+    if(list.length === 0){
+      const empty = document.createElement('div');
+      empty.style.color = '#7a8aa0';
+      empty.style.fontSize = '0.85em';
+      empty.textContent = 'No verbs yet — add one above.';
+      setList.appendChild(empty);
+      return;
+    }
+    list.forEach((entry, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'set-row';
+
+      const baseSpan = document.createElement('div');
+      baseSpan.style.minWidth = '70px';
+      baseSpan.style.fontWeight = '700';
+      baseSpan.style.color = '#7a8aa0';
+      baseSpan.style.fontSize = '0.85em';
+      baseSpan.textContent = entry.base;
+      row.appendChild(baseSpan);
+
+      const correctInput = document.createElement('input');
+      correctInput.type = 'text';
+      correctInput.value = entry.correct;
+      correctInput.placeholder = 'correct form';
+      correctInput.addEventListener('change', ()=>{
+        entry.correct = correctInput.value.trim() || entry.correct;
+        saveVerbs(VERBS);
+      });
+      row.appendChild(correctInput);
+
+      const wrongInput = document.createElement('input');
+      wrongInput.type = 'text';
+      wrongInput.value = entry.wrong;
+      wrongInput.placeholder = 'wrong form';
+      wrongInput.addEventListener('change', ()=>{
+        entry.wrong = wrongInput.value.trim() || entry.wrong;
+        saveVerbs(VERBS);
+      });
+      row.appendChild(wrongInput);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Remove';
+      delBtn.addEventListener('click', ()=>{
+        list.splice(idx,1);
+        saveVerbs(VERBS);
+        renderSetList();
+      });
+      row.appendChild(delBtn);
+
+      setList.appendChild(row);
+    });
+  }
+
+  document.getElementById('addVerbBtn').addEventListener('click', ()=>{
+    const base = document.getElementById('newBase').value.trim();
+    const correct = document.getElementById('newCorrect').value.trim();
+    const wrong = document.getElementById('newWrong').value.trim();
+    if(!correct || !wrong){
+      alert('Please fill in at least the Correct and Wrong fields.');
+      return;
+    }
+    if(!VERBS[manageTense]) VERBS[manageTense] = [];
+    VERBS[manageTense].push({ base: base || '—', correct, wrong });
+    saveVerbs(VERBS);
+    document.getElementById('newBase').value = '';
+    document.getElementById('newCorrect').value = '';
+    document.getElementById('newWrong').value = '';
+    renderSetList();
+  });
+
+  document.getElementById('resetVerbsBtn').addEventListener('click', ()=>{
+    if(confirm('Reset ALL verb lists to the built-in defaults? This removes any verbs you added.')){
+      VERBS = JSON.parse(JSON.stringify(DEFAULT_VERBS));
+      saveVerbs(VERBS);
+      if(!VERBS[manageTense]) manageTense = Object.keys(VERBS)[0];
+      if(!VERBS[currentTense]) currentTense = Object.keys(VERBS)[0];
+      refreshManageChips();
+      refreshStartChips();
+      renderSetList();
+    }
+  });
+
+  document.getElementById('manageBtn').addEventListener('click', ()=>{
+    pauseIfRunning();
+    openManage();
+  });
+  document.getElementById('openManageFromStart').addEventListener('click', openManage);
+  document.getElementById('closeManageBtn').addEventListener('click', ()=>{
+    manageOverlay.classList.add('hidden');
+    if(!running && score === 0 && correctHits===0 && wrongHits===0){
+      startOverlay.classList.remove('hidden');
+    }
+  });
+
+  function openManage(){
+    manageTense = currentTense;
+    refreshManageChips();
+    renderSetList();
+    manageOverlay.classList.remove('hidden');
+  }
+
+  function pauseIfRunning(){
+    if(running){
+      stopGame(false);
+    }
+  }
+
+  /* ================= GAME LOGIC ================= */
+  function pickWordForHole(){
+    const pool = VERBS[currentTense] || [];
+    if(pool.length === 0) return null;
+    const entry = pool[Math.floor(Math.random()*pool.length)];
+    const isCorrect = Math.random() < 0.5;
+    return {
+      text: isCorrect ? entry.correct : entry.wrong,
+      isCorrect
+    };
+  }
+
+  function getFreeHoles(){
+    const free = [];
+    holeState.forEach((s, i)=>{ if(!s) free.push(i); });
+    return free;
+  }
+
+  function spawnMoles(){
+    if(!running) return;
+    const free = getFreeHoles();
+    if(free.length === 0) return;
+
+    const count = Math.min(free.length, (Math.random() < 0.55 ? 1 : 2));
+    // shuffle free
+    for(let i=free.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [free[i], free[j]] = [free[j], free[i]];
+    }
+    for(let k=0;k<count;k++){
+      spawnAt(free[k]);
+    }
+  }
+
+  function spawnAt(idx){
+    const word = pickWordForHole();
+    if(!word) return;
+
+    const holeEl = holes[idx];
+    const mole = document.createElement('div');
+    mole.className = 'mole';
+    mole.textContent = word.text;
+    mole.dataset.correct = word.isCorrect ? '1' : '0';
+    holeEl.appendChild(mole);
+
+    // force reflow then animate up
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{ mole.classList.add('up'); });
+    });
+
+    const timeoutId = setTimeout(()=>{
+      retractMole(idx, false);
+    }, MOLE_VISIBLE_MS);
+
+    holeState[idx] = { moleEl: mole, timeoutId, isCorrect: word.isCorrect, resolved:false };
+
+    mole.addEventListener('click', ()=> handleHit(idx));
+    mole.addEventListener('touchstart', (e)=>{ e.preventDefault(); handleHit(idx); }, {passive:false});
+  }
+
+  function retractMole(idx, wasHit){
+    const st = holeState[idx];
+    if(!st) return;
+    if(st.timeoutId) clearTimeout(st.timeoutId);
+    const mole = st.moleEl;
+    if(mole){
+      if(!wasHit){
+        mole.classList.remove('up');
+        setTimeout(()=>{ mole.remove(); }, 400);
+      }
+    }
+    holeState[idx] = null;
+  }
+
+  function spawnFloater(holeIdx, text, cls){
+    const holeEl = holes[holeIdx];
+    const f = document.createElement('div');
+    f.className = 'floater ' + cls;
+    f.textContent = text;
+    holeEl.appendChild(f);
+    setTimeout(()=>{ f.remove(); }, 900);
+  }
+
+  function handleHit(idx){
+    if(!running) return;
+    const st = holeState[idx];
+    if(!st || st.resolved) return;
+    st.resolved = true;
+    if(st.timeoutId) clearTimeout(st.timeoutId);
+
+    const mole = st.moleEl;
+
+    if(st.isCorrect){
+      score += 10;
+      correctHits++;
+      streak++;
+      if(streak > bestStreak) bestStreak = streak;
+      mole.classList.add('correct-anim');
+      spawnFloater(idx, '+10', 'plus');
+    } else {
+      score -= 5;
+      wrongHits++;
+      streak = 0;
+      mole.classList.add('wrong-anim');
+      spawnFloater(idx, '-5', 'minus');
+      triggerFieldError();
+    }
+
+    updateHUD();
+
+    setTimeout(()=>{
+      if(mole && mole.parentNode) mole.remove();
+      holeState[idx] = null;
+    }, 380);
+  }
+
+  function triggerFieldError(){
+    field.classList.add('shake', 'flash-error');
+    setTimeout(()=>{
+      field.classList.remove('shake', 'flash-error');
+    }, 420);
+  }
+
+  function updateHUD(){
+    scoreNum.textContent = score;
+    streakNum.textContent = streak;
+  }
+
+  function updateTimerUI(){
+    const pct = Math.max(0, (timeLeft / ROUND_SECONDS) * 100);
+    timerFill.style.width = pct + '%';
+    timerNum.textContent = timeLeft + 's';
+    if(timeLeft <= 10){
+      timerFill.classList.add('warn');
+    } else {
+      timerFill.classList.remove('warn');
+    }
+  }
+
+  function startGame(){
+    // reset state
+    score = 0; streak = 0; bestStreak = 0; correctHits = 0; wrongHits = 0;
+    timeLeft = ROUND_SECONDS;
+    holeState.forEach((_, i)=> holeState[i] = null);
+    holes.forEach(h => { h.innerHTML = ''; });
+    updateHUD();
+    updateTimerUI();
+    tenseLabel.textContent = currentTense;
+
+    startOverlay.classList.add('hidden');
+    resultOverlay.classList.add('hidden');
+    manageOverlay.classList.add('hidden');
+
+    running = true;
+
+    spawnTimerId = setInterval(spawnMoles, SPAWN_INTERVAL_MS);
+    spawnMoles(); // immediate first spawn
+
+    countdownTimerId = setInterval(()=>{
+      timeLeft--;
+      updateTimerUI();
+      if(timeLeft <= 0){
+        stopGame(true);
+      }
+    }, 1000);
+  }
+
+  function stopGame(showResults){
+    running = false;
+    if(spawnTimerId){ clearInterval(spawnTimerId); spawnTimerId = null; }
+    if(countdownTimerId){ clearInterval(countdownTimerId); countdownTimerId = null; }
+
+    // freeze board: remove pending timeouts, clear moles
+    holeState.forEach((st, i)=>{
+      if(st){
+        if(st.timeoutId) clearTimeout(st.timeoutId);
+        if(st.moleEl && st.moleEl.parentNode) st.moleEl.remove();
+      }
+      holeState[i] = null;
+    });
+
+    if(showResults){
+      showResultOverlay();
+    }
+  }
+
+  function showResultOverlay(){
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('statCorrect').textContent = correctHits;
+    document.getElementById('statWrong').textContent = wrongHits;
+    document.getElementById('statBestStreak').textContent = bestStreak;
+
+    let title = 'Nice Try!';
+    let badge = 'Round Complete';
+    if(score >= 100){ title = 'Conjugation Master! 🏆'; badge = 'Outstanding'; }
+    else if(score >= 60){ title = 'Great Job! 🎉'; badge = 'Well Played'; }
+    else if(score >= 30){ title = 'Good Effort! 👍'; badge = 'Round Complete'; }
+
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultBadge').textContent = badge;
+
+    resultOverlay.classList.remove('hidden');
+  }
+
+  /* ================= EVENTS ================= */
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+    // reshuffle is inherent since words are picked randomly each spawn
+    startGame();
+  });
+  document.getElementById('changeTenseBtn').addEventListener('click', ()=>{
+    resultOverlay.classList.add('hidden');
+    refreshStartChips();
+    startOverlay.classList.remove('hidden');
+  });
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    stopGame(false);
+    refreshStartChips();
+    startOverlay.classList.remove('hidden');
+  });
+
+  /* ================= INIT ================= */
+  refreshStartChips();
+  refreshManageChips();
+  renderSetList();
+  updateHUD();
+  updateTimerUI();
+})();
+</script>
+</body>
+</html>
