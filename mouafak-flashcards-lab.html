@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mouafak Edtech · Advanced Flashcards Lab</title>
+
+<style>
+  /* =========================================================
+     MOUAFAK EDTECH — DESIGN TOKENS
+     Deep Navy #0D1B2A · Electric Blue #2563EB · Vibrant Purple #7C3AED
+     Cyan #22D3EE · White #FFFFFF · Light Gray #FBFAFC
+     Font family: Poppins (system fallback stack for offline use)
+     ========================================================= */
+  :root{
+    --navy:#0D1B2A;
+    --blue:#2563EB;
+    --purple:#7C3AED;
+    --cyan:#22D3EE;
+    --white:#FFFFFF;
+    --lightgray:#FBFAFC;
+    --ink:#0D1B2A;
+    --muted:#64748B;
+    --radius-lg:1.5rem;
+    --radius-md:1rem;
+    --shadow-soft:0 10px 30px -12px rgba(13,27,42,0.15), 0 2px 8px -2px rgba(13,27,42,0.08);
+    --shadow-deep:0 25px 50px -12px rgba(13,27,42,0.35);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    font-family:'Poppins','Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    /* calm blend of soft light gray + gentle blue */
+    background:
+      radial-gradient(1100px 600px at 8% -5%, rgba(37,99,235,0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(124,58,237,0.08), transparent 55%),
+      linear-gradient(180deg, #F7F9FC 0%, #FBFAFC 45%, #F3F6FB 100%);
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+  }
+
+  img, svg{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border:1px solid rgba(13,27,42,0.05);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .logo-ring{
+    width:56px;height:56px;border-radius:50%;
+    background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 3px var(--white), 0 0 0 5px var(--purple);
+    flex-shrink:0;
+  }
+  .brand h1{
+    margin:0;
+    font-size:1.15rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--navy);
+  }
+  .brand p{
+    margin:2px 0 0;
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .brand .accent{ color:var(--purple); }
+
+  .import-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    color:#fff;
+    border:none;
+    padding:11px 18px;
+    border-radius:999px;
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.85rem;
+    cursor:pointer;
+    box-shadow:0 8px 18px -6px rgba(124,58,237,0.45);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .import-btn:hover{ transform:translateY(-2px); box-shadow:0 12px 22px -6px rgba(124,58,237,0.55); }
+  .import-btn:active{ transform:translateY(0); }
+
+  /* ---------- Meta / progress ---------- */
+  .meta-row{
+    margin-top:22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .lesson-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--white);
+    border:1px solid rgba(13,27,42,0.08);
+    padding:7px 14px;border-radius:999px;
+    font-size:0.78rem;font-weight:600;color:var(--navy);
+    box-shadow:var(--shadow-soft);
+  }
+  .lesson-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);}
+
+  .counter{
+    font-size:0.85rem;
+    font-weight:600;
+    color:var(--muted);
+  }
+  .counter b{ color:var(--navy); }
+
+  .progress-track{
+    margin-top:10px;
+    height:8px;
+    width:100%;
+    background:rgba(13,27,42,0.07);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--blue), var(--cyan));
+    border-radius:999px;
+    transition:width .35s ease;
+    width:0%;
+  }
+
+  /* ---------- Flip Card ---------- */
+  .stage{
+    margin-top:34px;
+    display:flex;
+    justify-content:center;
+  }
+  .card-scene{
+    width:100%;
+    max-width:640px;
+    height:340px;
+    perspective:1600px;
+  }
+  .card{
+    position:relative;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+
+  .face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    border-radius:var(--radius-lg);
+    background:var(--white);
+    box-shadow:var(--shadow-deep);
+    border:1px solid rgba(13,27,42,0.06);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:36px 30px;
+    text-align:center;
+  }
+  .face.back{ transform:rotateY(180deg); }
+
+  .face-tag{
+    position:absolute;
+    top:20px; left:24px;
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--purple);
+    background:rgba(124,58,237,0.08);
+    padding:5px 11px;
+    border-radius:999px;
+  }
+  .face-tag.blue{ color:var(--blue); background:rgba(37,99,235,0.08); }
+
+  .face-icon{
+    width:44px;height:44px;
+    margin-bottom:14px;
+    color:var(--cyan);
+  }
+
+  .word{
+    font-size:2.4rem;
+    font-weight:700;
+    color:var(--navy);
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  .hint{
+    margin-top:10px;
+    font-size:0.85rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+
+  .meaning{
+    font-size:1.9rem;
+    font-weight:700;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1.2;
+  }
+
+  .feedback-row{
+    margin-top:22px;
+    display:flex;
+    gap:12px;
+  }
+  .fb-btn{
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.85rem;
+    padding:10px 18px;
+    border-radius:999px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .fb-btn.know{
+    background:rgba(34,197,94,0.10);
+    color:#15803d;
+    border-color:rgba(34,197,94,0.35);
+  }
+  .fb-btn.know:hover{ background:rgba(34,197,94,0.18); transform:translateY(-2px); }
+  .fb-btn.miss{
+    background:rgba(239,68,68,0.10);
+    color:#b91c1c;
+    border-color:rgba(239,68,68,0.35);
+  }
+  .fb-btn.miss:hover{ background:rgba(239,68,68,0.18); transform:translateY(-2px); }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+  }
+  .ctrl-btn{
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.88rem;
+    padding:12px 22px;
+    border-radius:999px;
+    border:1px solid rgba(13,27,42,0.08);
+    background:var(--white);
+    color:var(--navy);
+    box-shadow:var(--shadow-soft);
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .ctrl-btn:hover:not(:disabled){ transform:translateY(-2px); }
+  .ctrl-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .ctrl-btn.primary{
+    background:linear-gradient(135deg, var(--navy), #16233A);
+    color:#fff;
+    border-color:transparent;
+    padding:12px 30px;
+  }
+
+  /* ---------- Report ---------- */
+  .report-overlay{
+    display:none;
+    margin-top:34px;
+    justify-content:center;
+  }
+  .report-overlay.show{ display:flex; }
+  .report-card{
+    width:100%;
+    max-width:560px;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-deep);
+    padding:40px 36px;
+    text-align:center;
+    border:1px solid rgba(13,27,42,0.06);
+  }
+  .report-icon{
+    width:64px;height:64px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .report-title{
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--navy);
+    margin:0 0 4px;
+  }
+  .report-sub{
+    color:var(--muted);
+    font-size:0.88rem;
+    margin:0 0 26px;
+  }
+  .score-ring-wrap{ position:relative; width:170px; height:170px; margin:0 auto 26px; }
+  .score-pct{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .score-pct .num{ font-size:2.1rem; font-weight:700; color:var(--navy); }
+  .score-pct .lbl{ font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:26px;
+  }
+  .stat-box{
+    border-radius:var(--radius-md);
+    padding:16px;
+    text-align:left;
+  }
+  .stat-box.know{ background:rgba(34,197,94,0.08); }
+  .stat-box.miss{ background:rgba(239,68,68,0.08); }
+  .stat-box .n{ font-size:1.5rem; font-weight:700; }
+  .stat-box.know .n{ color:#15803d; }
+  .stat-box.miss .n{ color:#b91c1c; }
+  .stat-box .t{ font-size:0.75rem; color:var(--muted); font-weight:600; margin-top:2px; }
+
+  .report-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  .footer-tag{
+    text-align:center;
+    margin-top:36px;
+    font-size:0.75rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .footer-tag b{ color:var(--purple); }
+
+  input[type="file"]{ display:none; }
+
+  @media (max-width:520px){
+    .word{ font-size:1.8rem; }
+    .meaning{ font-size:1.5rem; }
+    .card-scene{ height:300px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ===================== HEADER ===================== -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-ring">
+        <!-- Robot mark, matches Mouafak Edtech identity -->
+        <img src="logo.png" width="56" height="56"/>
+      </div>
+      <div>
+        <h1>Mouafak <span class="accent">Edtech</span></h1>
+        <p>Advanced Flashcards Lab — Save Time · Engage Students · Teach Smarter</p>
+      </div>
+    </div>
+
+    <div>
+      <button class="import-btn" id="importBtn" title="Upload a .txt lesson file">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        Import New Lesson
+      </button>
+      <input type="file" id="fileInput" accept=".txt">
+    </div>
+  </div>
+
+  <!-- ===================== META / PROGRESS ===================== -->
+  <div class="meta-row">
+    <span class="lesson-badge"><span class="dot"></span><span id="lessonName">Irregular Verbs — Intermediate / High School</span></span>
+    <span class="counter">Card <b id="curNum">1</b> of <b id="totalNum">10</b></span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- ===================== FLASHCARD ===================== -->
+  <div class="stage" id="stage">
+    <div class="card-scene">
+      <div class="card" id="card">
+        <div class="face front">
+          <span class="face-tag">Word</span>
+          <svg class="face-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h.01M15 9h.01M9 15c1 1 5 1 6 0"/></svg>
+          <div class="word" id="frontText">Go</div>
+          <div class="hint">Tap the card to reveal the meaning</div>
+        </div>
+        <div class="face back">
+          <span class="face-tag blue">Meaning</span>
+          <div class="meaning" id="backText">Went</div>
+          <div class="feedback-row">
+            <button class="fb-btn know" id="knowBtn">I Knew It 👍</button>
+            <button class="fb-btn miss" id="missBtn">I Missed It 👎</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONTROLS ===================== -->
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Previous
+    </button>
+    <button class="ctrl-btn primary" id="flipBtn">Flip</button>
+    <button class="ctrl-btn" id="nextBtn">
+      Next
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <!-- ===================== FINAL REPORT ===================== -->
+  <div class="report-overlay" id="reportOverlay">
+    <div class="report-card">
+      <div class="report-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z"/><path d="M8.21 13.89 7 22l5-3 5 3-1.21-8.12"/></svg>
+      </div>
+      <h2 class="report-title">Lesson Complete!</h2>
+      <p class="report-sub" id="reportSub">Here's how you did on this deck.</p>
+
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 170 170" width="170" height="170">
+          <circle cx="85" cy="85" r="72" fill="none" stroke="rgba(13,27,42,0.08)" stroke-width="14"/>
+          <circle id="scoreCircle" cx="85" cy="85" r="72" fill="none" stroke="url(#grad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452" transform="rotate(-90 85 85)"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563EB"/>
+              <stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="score-pct">
+          <div class="num" id="scoreNum">0%</div>
+          <div class="lbl">Recall Rate</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box know"><div class="n" id="knownCountEl">0</div><div class="t">Cards Known</div></div>
+        <div class="stat-box miss"><div class="n" id="missedCountEl">0</div><div class="t">Cards Missed</div></div>
+      </div>
+
+      <div class="report-actions">
+        <button class="ctrl-btn primary" id="restartBtn">Restart Deck</button>
+        <button class="ctrl-btn" id="importAgainBtn">Import New Lesson</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-tag">Powered by <b>Mouafak Edtech</b> — AI & EdTech Resources for Language Teachers</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     CONTENT SECURITY SHIELD
+     Blocks right-click, text selection, and dev-tool shortcuts.
+     ========================================================= */
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
+  document.addEventListener('dragstart', function(e){ e.preventDefault(); });
+  document.addEventListener('copy', function(e){ e.preventDefault(); });
+  document.addEventListener('cut', function(e){ e.preventDefault(); });
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    var blocked =
+      k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'i')) ||
+      (e.ctrlKey && e.shiftKey && (k === 'J' || k === 'j')) ||
+      (e.ctrlKey && e.shiftKey && (k === 'C' || k === 'c')) ||
+      (e.ctrlKey && (k === 'U' || k === 'u')) ||
+      (e.metaKey && e.altKey && (k === 'I' || k === 'i')); // mac inspector
+    if (blocked){ e.preventDefault(); e.stopPropagation(); return false; }
+  });
+
+  /* =========================================================
+     DEFAULT LESSON — sample content, replace via Import
+     Level: Intermediate / High School — English irregular verbs
+     ========================================================= */
+  var DEFAULT_DECK = [
+    { front: "Go",     back: "Went" },
+    { front: "Eat",    back: "Ate" },
+    { front: "See",    back: "Saw" },
+    { front: "Take",   back: "Took" },
+    { front: "Write",  back: "Wrote" },
+    { front: "Speak",  back: "Spoke" },
+    { front: "Break",  back: "Broke" },
+    { front: "Begin",  back: "Began" },
+    { front: "Choose", back: "Chose" },
+    { front: "Drive",  back: "Drove" }
+  ];
+
+  var deck = DEFAULT_DECK.slice();
+  var index = 0;
+  var flipped = false;
+  var answers = {}; // index -> 'know' | 'miss'
+
+  var els = {
+    card: document.getElementById('card'),
+    frontText: document.getElementById('frontText'),
+    backText: document.getElementById('backText'),
+    curNum: document.getElementById('curNum'),
+    totalNum: document.getElementById('totalNum'),
+    progressFill: document.getElementById('progressFill'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    flipBtn: document.getElementById('flipBtn'),
+    knowBtn: document.getElementById('knowBtn'),
+    missBtn: document.getElementById('missBtn'),
+    stage: document.getElementById('stage'),
+    controls: document.querySelector('.controls'),
+    reportOverlay: document.getElementById('reportOverlay'),
+    scoreCircle: document.getElementById('scoreCircle'),
+    scoreNum: document.getElementById('scoreNum'),
+    knownCountEl: document.getElementById('knownCountEl'),
+    missedCountEl: document.getElementById('missedCountEl'),
+    restartBtn: document.getElementById('restartBtn'),
+    importAgainBtn: document.getElementById('importAgainBtn'),
+    importBtn: document.getElementById('importBtn'),
+    fileInput: document.getElementById('fileInput'),
+    lessonName: document.getElementById('lessonName')
+  };
+
+  function render(){
+    var card = deck[index];
+    els.frontText.textContent = card.front;
+    els.backText.textContent = card.back;
+    els.curNum.textContent = index + 1;
+    els.totalNum.textContent = deck.length;
+    els.progressFill.style.width = (((index) / deck.length) * 100) + '%';
+    els.prevBtn.disabled = (index === 0);
+    els.card.classList.remove('flipped');
+    flipped = false;
+  }
+
+  function flipCard(){
+    flipped = !flipped;
+    els.card.classList.toggle('flipped', flipped);
+  }
+
+  function goTo(newIndex){
+    if (newIndex < 0 || newIndex >= deck.length) return;
+    index = newIndex;
+    render();
+  }
+
+  function recordAnswer(type){
+    answers[index] = type;
+    if (index === deck.length - 1){
+      showReport();
+    } else {
+      goTo(index + 1);
+    }
+  }
+
+  function showReport(){
+    var known = 0, missed = 0;
+    deck.forEach(function(_, i){
+      if (answers[i] === 'know') known++;
+      else if (answers[i] === 'miss') missed++;
+    });
+    var answered = known + missed;
+    var pct = answered > 0 ? Math.round((known / answered) * 100) : 0;
+
+    els.knownCountEl.textContent = known;
+    els.missedCountEl.textContent = missed;
+    els.scoreNum.textContent = pct + '%';
+
+    var circumference = 452;
+    var offset = circumference - (circumference * pct / 100);
+    els.scoreCircle.style.transition = 'stroke-dashoffset 1s ease';
+    requestAnimationFrame(function(){
+      els.scoreCircle.style.strokeDashoffset = offset;
+    });
+
+    els.progressFill.style.width = '100%';
+    els.stage.style.display = 'none';
+    els.controls.style.display = 'none';
+    els.reportOverlay.classList.add('show');
+  }
+
+  function hideReport(){
+    els.reportOverlay.classList.remove('show');
+    els.stage.style.display = 'flex';
+    els.controls.style.display = 'flex';
+  }
+
+  function resetDeck(newDeck, label){
+    deck = newDeck;
+    index = 0;
+    answers = {};
+    if (label) els.lessonName.textContent = label;
+    hideReport();
+    render();
+  }
+
+  /* ---------- events ---------- */
+  els.card.addEventListener('click', flipCard);
+  els.flipBtn.addEventListener('click', flipCard);
+  els.prevBtn.addEventListener('click', function(){ goTo(index - 1); });
+  els.nextBtn.addEventListener('click', function(){ goTo(index + 1); });
+  els.knowBtn.addEventListener('click', function(e){ e.stopPropagation(); recordAnswer('know'); });
+  els.missBtn.addEventListener('click', function(e){ e.stopPropagation(); recordAnswer('miss'); });
+  els.restartBtn.addEventListener('click', function(){ resetDeck(deck, null); });
+
+  els.importBtn.addEventListener('click', function(){ els.fileInput.click(); });
+  els.importAgainBtn.addEventListener('click', function(){ els.fileInput.click(); });
+
+  els.fileInput.addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var text = evt.target.result;
+      var lines = text.split(/\r?\n/);
+      var newDeck = [];
+      lines.forEach(function(line){
+        if (!line.trim()) return;
+        var parts = line.split('=');
+        if (parts.length >= 2){
+          var front = parts[0].trim();
+          var back = parts.slice(1).join('=').trim();
+          if (front && back) newDeck.push({ front: front, back: back });
+        }
+      });
+      if (newDeck.length === 0){
+        alert('No valid lines found. Please use the format:\nWord = Meaning');
+        return;
+      }
+      var label = file.name.replace(/\.txt$/i, '');
+      resetDeck(newDeck, label);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  /* keyboard shortcuts for classroom use */
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') goTo(index + 1);
+    if (e.key === 'ArrowLeft') goTo(index - 1);
+    if (e.key === ' '){ e.preventDefault(); flipCard(); }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
