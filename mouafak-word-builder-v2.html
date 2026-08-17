@@ -498,7 +498,7 @@
     <input class="field-input" id="importFolder" type="text" placeholder="images/animals/" value="images/animals/">
 
     <label class="field-label" for="importFiles">Filenames — one per line</label>
-    <textarea class="field-input" id="importFiles" placeholder="lion.png&#10;elephant.png&#10;giraffe.png"></textarea>
+    <textarea class="field-input" id="importFiles" placeholder="Lion.png&#10;elephant.png&#10;giraffe.png"></textarea>
     <p class="field-hint">Tip: you can also write "Word = filename.png" on a line to set a custom word that overrides the filename (useful for two-word items like "Sea Turtle = seaturtle.png").</p>
 
     <div class="import-msg" id="importMsg"></div>
@@ -571,10 +571,10 @@
 
   /* ---------------- Built-in vocabulary ----------------
      PNG files must live in an "images/animals/" folder next to this HTML file.
-     Each file's name should match the word (see list below), e.g. lion.png, elephant.png.
+     Each file's name should match the word (see list below), e.g. Lion.png, elephant.png.
      This mirrors the same "filename = word" rule used for uploads and imports. */
   const BUILTIN_ANIMALS = [
-    { word: 'Lion',        file: 'lion.png' },
+    { word: 'Lion',        file: 'Lion.png' },
     { word: 'Elephant',    file: 'elephant.png' },
     { word: 'Giraffe',     file: 'giraffe.png' },
     { word: 'Zebra',       file: 'zebra.png' },
