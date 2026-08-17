@@ -495,7 +495,7 @@
     <p>Point this at any folder of PNG/JPG files sitting next to this HTML file. Each image's <strong>filename becomes the word</strong> students spell — e.g. <code>giraffe.png</code> → <strong>giraffe</strong>. One filename per line.</p>
 
     <label class="field-label" for="importFolder">Folder path (relative to this HTML file)</label>
-    <input class="field-input" id="importFolder" type="text" placeholder="Images/animals/" value="Images/animals/">
+    <input class="field-input" id="importFolder" type="text" placeholder="images/animals/" value="images/animals/">
 
     <label class="field-label" for="importFiles">Filenames — one per line</label>
     <textarea class="field-input" id="importFiles" placeholder="lion.png&#10;elephant.png&#10;giraffe.png"></textarea>
@@ -570,7 +570,7 @@
   let distractorMode = true; // toggled in setup view
 
   /* ---------------- Built-in vocabulary ----------------
-     PNG files must live in an "Images/animals/" folder next to this HTML file.
+     PNG files must live in an "images/animals/" folder next to this HTML file.
      Each file's name should match the word (see list below), e.g. lion.png, elephant.png.
      This mirrors the same "filename = word" rule used for uploads and imports. */
   const BUILTIN_ANIMALS = [
@@ -591,7 +591,7 @@
     { word: 'Cow',         file: 'cow.png' },
     { word: 'Camel',       file: 'camel.png' }
   ];
-  const BUILTIN_FOLDER = 'Images/animals/';
+  const BUILTIN_FOLDER = 'images/animals/';
 
   /* ---------------- Elements ---------------- */
   const fileInput   = document.getElementById('fileInput');
