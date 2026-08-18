@@ -632,7 +632,23 @@
     }
     .mole{ font-size: 2.6vh; min-height:52%; }
   }
+  .facebook-link {
+    margin-left: 15px;
+    font-size: 24px;
+    color: #1877F2;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .facebook-link:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 </style>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -663,6 +679,13 @@
       </div>
       <button class="icon-btn" id="manageBtn" title="Manage verb lists">📝</button>
       <button class="icon-btn" id="restartBtn" title="Restart">↻</button>
+      <a href="https://www.facebook.com/MouafakEdTechLab"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Visit Mouafak EDTECH on Facebook"
+        class="facebook-link">
+        <i class="fab fa-facebook-f"></i>
+      </a>
     </div>
   </header>
 
