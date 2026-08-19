@@ -562,6 +562,7 @@
   var index = 0;
   var flipped = false;
   var answers = {}; // index -> 'know' | 'miss'
+  var pendingNextIndex = null; // Tracks index to switch to after flip animation finishes
 
   var els = {
     card: document.getElementById('card'),
@@ -614,12 +615,27 @@
 
   function recordAnswer(type){
     answers[index] = type;
+    
+    // Check if this is the last card
     if (index === deck.length - 1){
       showReport();
     } else {
-      goTo(index + 1);
+      // Trigger card to flip back down first, then update data after transition ends
+      pendingNextIndex = index + 1;
+      flipped = false;
+      els.card.classList.remove('flipped');
     }
   }
+
+  // Listen for the flip-back transition completion to update card content safely
+  els.card.addEventListener('transitionend', function(e){
+    // Only act on transform transitions and when we have a pending card waiting
+    if (e.propertyName === 'transform' && pendingNextIndex !== null && !flipped) {
+      index = pendingNextIndex;
+      pendingNextIndex = null;
+      render();
+    }
+  });
 
   function showReport(){
     var known = 0, missed = 0;
@@ -657,6 +673,7 @@
     deck = newDeck;
     index = 0;
     answers = {};
+    pendingNextIndex = null;
     if (label) els.lessonName.textContent = label;
     hideReport();
     render();
