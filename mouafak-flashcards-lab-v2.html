@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mouafak Edtech · Advanced Flashcards Lab</title>
+
+<style>
+  /* =========================================================
+     MOUAFAK EDTECH — DESIGN TOKENS
+     Deep Navy #0D1B2A · Electric Blue #2563EB · Vibrant Purple #7C3AED
+     Cyan #22D3EE · White #FFFFFF · Light Gray #FBFAFC
+     Font family: Poppins (system fallback stack for offline use)
+     ========================================================= */
+  :root{
+    --navy:#0D1B2A;
+    --blue:#2563EB;
+    --purple:#7C3AED;
+    --cyan:#22D3EE;
+    --white:#FFFFFF;
+    --lightgray:#FBFAFC;
+    --ink:#0D1B2A;
+    --muted:#64748B;
+    --radius-lg:1.5rem;
+    --radius-md:1rem;
+    --shadow-soft:0 10px 30px -12px rgba(13,27,42,0.15), 0 2px 8px -2px rgba(13,27,42,0.08);
+    --shadow-deep:0 25px 50px -12px rgba(13,27,42,0.35);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    font-family:'Poppins','Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    /* calm blend of soft light gray + gentle blue */
+    background:
+      radial-gradient(1100px 600px at 8% -5%, rgba(37,99,235,0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(124,58,237,0.08), transparent 55%),
+      linear-gradient(180deg, #F7F9FC 0%, #FBFAFC 45%, #F3F6FB 100%);
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+  }
+
+  img, svg{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border:1px solid rgba(13,27,42,0.05);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .logo-ring{
+    width:56px;height:56px;border-radius:50%;
+    background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 3px var(--white), 0 0 0 5px var(--purple);
+    flex-shrink:0;
+  }
+  .brand h1{
+    margin:0;
+    font-size:1.15rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--navy);
+  }
+  .brand p{
+    margin:2px 0 0;
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .brand .accent{ color:var(--purple); }
+
+  .import-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    color:#fff;
+    border:none;
+    padding:11px 18px;
+    border-radius:999px;
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.85rem;
+    cursor:pointer;
+    box-shadow:0 8px 18px -6px rgba(124,58,237,0.45);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .import-btn:hover{ transform:translateY(-2px); box-shadow:0 12px 22px -6px rgba(124,58,237,0.55); }
+  .import-btn:active{ transform:translateY(0); }
+
+  /* ---------- Meta / progress ---------- */
+  .meta-row{
+    margin-top:22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .lesson-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--white);
+    border:1px solid rgba(13,27,42,0.08);
+    padding:7px 14px;border-radius:999px;
+    font-size:0.78rem;font-weight:600;color:var(--navy);
+    box-shadow:var(--shadow-soft);
+  }
+  .lesson-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);}
+
+  .counter{
+    font-size:0.85rem;
+    font-weight:600;
+    color:var(--muted);
+  }
+  .counter b{ color:var(--navy); }
+
+  .progress-track{
+    margin-top:10px;
+    height:8px;
+    width:100%;
+    background:rgba(13,27,42,0.07);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--blue), var(--cyan));
+    border-radius:999px;
+    transition:width .35s ease;
+    width:0%;
+  }
+
+  /* ---------- Flip Card ---------- */
+  .stage{
+    margin-top:34px;
+    display:flex;
+    justify-content:center;
+  }
+  .card-scene{
+    width:100%;
+    max-width:640px;
+    height:340px;
+    perspective:1600px;
+  }
+  .card{
+    position:relative;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+
+  .face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    border-radius:var(--radius-lg);
+    background:var(--white);
+    box-shadow:var(--shadow-deep);
+    border:1px solid rgba(13,27,42,0.06);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:36px 30px;
+    text-align:center;
+  }
+  .face.back{ transform:rotateY(180deg); }
+
+  .face-tag{
+    position:absolute;
+    top:20px; left:24px;
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--purple);
+    background:rgba(124,58,237,0.08);
+    padding:5px 11px;
+    border-radius:999px;
+  }
+  .face-tag.blue{ color:var(--blue); background:rgba(37,99,235,0.08); }
+
+  .face-icon{
+    width:44px;height:44px;
+    margin-bottom:14px;
+    color:var(--cyan);
+  }
+
+  .word{
+    font-size:2.4rem;
+    font-weight:700;
+    color:var(--navy);
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  .hint{
+    margin-top:10px;
+    font-size:0.85rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+
+  .meaning{
+    font-size:1.9rem;
+    font-weight:700;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1.2;
+  }
+
+  .feedback-row{
+    margin-top:22px;
+    display:flex;
+    gap:12px;
+  }
+  .fb-btn{
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.85rem;
+    padding:10px 18px;
+    border-radius:999px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .fb-btn.know{
+    background:rgba(34,197,94,0.10);
+    color:#15803d;
+    border-color:rgba(34,197,94,0.35);
+  }
+  .fb-btn.know:hover{ background:rgba(34,197,94,0.18); transform:translateY(-2px); }
+  .fb-btn.miss{
+    background:rgba(239,68,68,0.10);
+    color:#b91c1c;
+    border-color:rgba(239,68,68,0.35);
+  }
+  .fb-btn.miss:hover{ background:rgba(239,68,68,0.18); transform:translateY(-2px); }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+  }
+  .ctrl-btn{
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.88rem;
+    padding:12px 22px;
+    border-radius:999px;
+    border:1px solid rgba(13,27,42,0.08);
+    background:var(--white);
+    color:var(--navy);
+    box-shadow:var(--shadow-soft);
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .ctrl-btn:hover:not(:disabled){ transform:translateY(-2px); }
+  .ctrl-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .ctrl-btn.primary{
+    background:linear-gradient(135deg, var(--navy), #16233A);
+    color:#fff;
+    border-color:transparent;
+    padding:12px 30px;
+  }
+
+  /* ---------- Report ---------- */
+  .report-overlay{
+    display:none;
+    margin-top:34px;
+    justify-content:center;
+  }
+  .report-overlay.show{ display:flex; }
+  .report-card{
+    width:100%;
+    max-width:560px;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-deep);
+    padding:40px 36px;
+    text-align:center;
+    border:1px solid rgba(13,27,42,0.06);
+  }
+  .report-icon{
+    width:64px;height:64px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .report-title{
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--navy);
+    margin:0 0 4px;
+  }
+  .report-sub{
+    color:var(--muted);
+    font-size:0.88rem;
+    margin:0 0 26px;
+  }
+  .score-ring-wrap{ position:relative; width:170px; height:170px; margin:0 auto 26px; }
+  .score-pct{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .score-pct .num{ font-size:2.1rem; font-weight:700; color:var(--navy); }
+  .score-pct .lbl{ font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:26px;
+  }
+  .stat-box{
+    border-radius:var(--radius-md);
+    padding:16px;
+    text-align:left;
+  }
+  .stat-box.know{ background:rgba(34,197,94,0.08); }
+  .stat-box.miss{ background:rgba(239,68,68,0.08); }
+  .stat-box .n{ font-size:1.5rem; font-weight:700; }
+  .stat-box.know .n{ color:#15803d; }
+  .stat-box.miss .n{ color:#b91c1c; }
+  .stat-box .t{ font-size:0.75rem; color:var(--muted); font-weight:600; margin-top:2px; }
+
+  .report-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  .footer-tag{
+    text-align:center;
+    margin-top:36px;
+    font-size:0.75rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .footer-tag b{ color:var(--purple); }
+
+  input[type="file"]{ display:none; }
+
+  @media (max-width:520px){
+    .word{ font-size:1.8rem; }
+    .meaning{ font-size:1.5rem; }
+    .card-scene{ height:300px; }
+  }
+  .facebook-link {
+    margin-left: 15px;
+    font-size: 24px;
+    color: #1877F2;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .facebook-link:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+
+  /* =========================================================
+     DECK MANAGEMENT — added on top of existing design system
+     ========================================================= */
+  .header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  #navDecksBtn.active{
+    background:linear-gradient(135deg, var(--navy), #16233A);
+    color:#fff;
+    border-color:transparent;
+  }
+
+  /* generic content container inside a flip-card face (text or image) */
+  .card-content{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    gap:8px;
+  }
+  .card-img{
+    max-width:100%;
+    max-height:200px;
+    object-fit:contain;
+    border-radius:12px;
+    box-shadow:0 8px 20px -8px rgba(13,27,42,0.25);
+  }
+  .content-placeholder{
+    color:var(--muted);
+    font-style:italic;
+    font-size:0.95rem;
+  }
+
+  /* ---------- Decks view ---------- */
+  .decks-header{
+    margin-top:22px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    padding:22px;
+    border:1px solid rgba(13,27,42,0.05);
+  }
+  .decks-header h2{ margin:0 0 4px; font-size:1.3rem; color:var(--navy); }
+  .decks-sub{ margin:0; color:var(--muted); font-size:0.85rem; font-weight:500; }
+  .decks-header-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .editor-header-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  .decks-list{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(270px,1fr));
+    gap:16px;
+  }
+  .deck-item{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    border:1px solid rgba(13,27,42,0.05);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .deck-item-info h3{ margin:0 0 6px; font-size:1.05rem; color:var(--navy); word-break:break-word; }
+  .deck-item-info p{ margin:0; font-size:0.78rem; color:var(--muted); font-weight:500; }
+  .deck-item-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+  .deck-item-actions .ctrl-btn{ padding:8px 14px; font-size:0.78rem; box-shadow:none; }
+
+  .ctrl-btn.danger{
+    color:#b91c1c;
+    border-color:rgba(239,68,68,0.3);
+    background:rgba(239,68,68,0.06);
+  }
+  .ctrl-btn.danger:hover:not(:disabled){ background:rgba(239,68,68,0.14); }
+
+  .decks-empty{
+    margin-top:24px;
+    text-align:center;
+    color:var(--muted);
+    font-weight:500;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    padding:44px 20px;
+    box-shadow:var(--shadow-soft);
+    border:1px solid rgba(13,27,42,0.05);
+  }
+
+  /* ---------- Create deck modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(13,27,42,0.45);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-card{
+    width:100%; max-width:420px;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-deep);
+    padding:28px;
+  }
+  .modal-card h2{ margin:0 0 6px; font-size:1.2rem; color:var(--navy); }
+  .modal-card label{
+    display:block; font-size:0.8rem; font-weight:600; color:var(--navy);
+    margin:16px 0 6px;
+  }
+  .modal-card input[type="text"], .modal-card input[type="number"]{
+    width:100%; padding:11px 14px; border-radius:10px;
+    border:1.5px solid rgba(13,27,42,0.12); font-family:inherit; font-size:0.9rem;
+    color:var(--ink);
+  }
+  .modal-card input:focus{ outline:none; border-color:var(--blue); }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+
+  /* ---------- Card editor view ---------- */
+  .editor-header{
+    margin-top:22px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-soft);
+    padding:18px 22px; border:1px solid rgba(13,27,42,0.05);
+  }
+  .editor-title{ text-align:center; flex:1; min-width:160px; }
+  .editor-title h2{ margin:0 0 4px; font-size:1.05rem; color:var(--navy); word-break:break-word; }
+
+  .editor-nav{
+    margin-top:16px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  }
+  .editor-nav-actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+  .editor-grid{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:700px){ .editor-grid{ grid-template-columns:1fr; } }
+
+  .side-editor{
+    background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-soft);
+    padding:18px; border:1px solid rgba(13,27,42,0.05);
+  }
+  .side-editor h3{ margin:0 0 12px; font-size:0.95rem; color:var(--navy); }
+  .type-toggle{ display:flex; gap:8px; margin-bottom:12px; }
+  .type-btn{
+    flex:1; font-family:inherit; font-weight:600; font-size:0.8rem;
+    padding:9px 12px; border-radius:999px; border:1.5px solid rgba(13,27,42,0.1);
+    background:var(--lightgray); color:var(--muted); cursor:pointer;
+    transition:all .15s ease;
+  }
+  .type-btn.active{
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    color:#fff; border-color:transparent;
+  }
+  .side-textarea{
+    width:100%; min-height:120px; padding:12px 14px; border-radius:12px;
+    border:1.5px solid rgba(13,27,42,0.1); font-family:inherit; font-size:0.9rem;
+    resize:vertical; color:var(--ink);
+  }
+  .side-textarea:focus{ outline:none; border-color:var(--blue); }
+  .side-image{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .side-image-preview{
+    max-width:100%; max-height:160px; border-radius:12px;
+    object-fit:contain; box-shadow:var(--shadow-soft);
+  }
+
+  .editor-preview{
+    margin-top:18px; background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-soft);
+    padding:18px 22px; border:1px solid rgba(13,27,42,0.05);
+  }
+  .editor-preview h3{ margin:0 0 14px; font-size:0.95rem; color:var(--navy); }
+  .preview-cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:600px){ .preview-cards{ grid-template-columns:1fr; } }
+  .preview-face{
+    position:relative; min-height:140px; border-radius:var(--radius-md);
+    background:var(--lightgray); border:1.5px dashed rgba(13,27,42,0.15);
+    display:flex; align-items:center; justify-content:center; padding:20px 14px; text-align:center;
+  }
+  .preview-face .card-img{ max-height:100px; }
+  .preview-label{
+    position:absolute; top:10px; left:12px; font-size:0.65rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.06em; color:var(--muted);
+  }
+</style>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ===================== HEADER ===================== -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-ring">
+        <!-- Robot mark, matches Mouafak Edtech identity -->
+        <img src="logo.png" width="56" height="56"/>
+      </div>
+      <div>
+        <h1>Mouafak <span class="accent">Edtech</span></h1>
+        <p>Advanced Flashcards Lab — Save Time · Engage Students · Teach Smarter</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="ctrl-btn" id="navDecksBtn" title="Manage your flashcard decks">📚 My Decks</button>
+      <button class="import-btn" id="importBtn" title="Upload a .txt lesson file">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        Import New Lesson
+      </button>
+      <input type="file" id="fileInput" accept=".txt">
+    </div>
+    <a href="https://www.facebook.com/MouafakEdTechLab"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Visit Mouafak EDTECH on Facebook"
+      class="facebook-link">
+      <i class="fab fa-facebook-f"></i>
+    </a>
+  </div>
+
+  <!-- ===================== STUDY VIEW ===================== -->
+  <div id="studyView">
+
+  <!-- ===================== META / PROGRESS ===================== -->
+  <div class="meta-row">
+    <span class="lesson-badge"><span class="dot"></span><span id="lessonName">Irregular Verbs — Intermediate / High School</span></span>
+    <span class="counter">Card <b id="curNum">1</b> of <b id="totalNum">10</b></span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- ===================== FLASHCARD ===================== -->
+  <div class="stage" id="stage">
+    <div class="card-scene">
+      <div class="card" id="card">
+        <div class="face front">
+          <span class="face-tag">Word</span>
+          <svg class="face-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h.01M15 9h.01M9 15c1 1 5 1 6 0"/></svg>
+          <div class="card-content" id="frontContent"></div>
+          <div class="hint">Tap the card to reveal the meaning</div>
+        </div>
+        <div class="face back">
+          <span class="face-tag blue">Meaning</span>
+          <div class="card-content" id="backContent"></div>
+          <div class="feedback-row">
+            <button class="fb-btn know" id="knowBtn">I Knew It 👍</button>
+            <button class="fb-btn miss" id="missBtn">I Missed It 👎</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONTROLS ===================== -->
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Previous
+    </button>
+    <button class="ctrl-btn primary" id="flipBtn">Flip</button>
+    <button class="ctrl-btn" id="nextBtn">
+      Next
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <!-- ===================== FINAL REPORT ===================== -->
+  <div class="report-overlay" id="reportOverlay">
+    <div class="report-card">
+      <div class="report-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z"/><path d="M8.21 13.89 7 22l5-3 5 3-1.21-8.12"/></svg>
+      </div>
+      <h2 class="report-title">Lesson Complete!</h2>
+      <p class="report-sub" id="reportSub">Here's how you did on this deck.</p>
+
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 170 170" width="170" height="170">
+          <circle cx="85" cy="85" r="72" fill="none" stroke="rgba(13,27,42,0.08)" stroke-width="14"/>
+          <circle id="scoreCircle" cx="85" cy="85" r="72" fill="none" stroke="url(#grad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452" transform="rotate(-90 85 85)"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563EB"/>
+              <stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="score-pct">
+          <div class="num" id="scoreNum">0%</div>
+          <div class="lbl">Recall Rate</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box know"><div class="n" id="knownCountEl">0</div><div class="t">Cards Known</div></div>
+        <div class="stat-box miss"><div class="n" id="missedCountEl">0</div><div class="t">Cards Missed</div></div>
+      </div>
+
+      <div class="report-actions">
+        <button class="ctrl-btn primary" id="restartBtn">Restart Deck</button>
+        <button class="ctrl-btn" id="importAgainBtn">Import New Lesson</button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /studyView -->
+
+  <!-- ===================== MY DECKS VIEW ===================== -->
+  <div id="decksView" class="view" style="display:none">
+    <div class="decks-header">
+      <div>
+        <h2>My Decks</h2>
+        <p class="decks-sub">Create, edit and study your own flashcard decks</p>
+      </div>
+      <div class="decks-header-actions">
+        <button class="ctrl-btn" id="importDecksBtn" title="Restore decks from a saved .json backup file">⬆ Import Decks</button>
+        <input type="file" id="importDecksInput" accept="application/json,.json">
+        <button class="ctrl-btn" id="exportAllDecksBtn" title="Save all your decks to a .json backup file">⬇ Export All</button>
+        <button class="ctrl-btn primary" id="createDeckBtn">+ Create New Deck</button>
+      </div>
+    </div>
+
+    <div id="decksList" class="decks-list"></div>
+    <div id="decksEmpty" class="decks-empty" style="display:none">
+      <p>No decks yet. Create your first deck to get started!</p>
+    </div>
+  </div>
+
+  <!-- ===================== CARD EDITOR VIEW ===================== -->
+  <div id="editorView" class="view" style="display:none">
+    <div class="editor-header">
+      <button class="ctrl-btn" id="editorBackBtn">← My Decks</button>
+      <div class="editor-title">
+        <h2 id="editorDeckName">Deck Name</h2>
+        <span class="counter">Card <b id="editorCurNum">1</b> of <b id="editorTotalNum">1</b></span>
+      </div>
+      <div class="editor-header-actions">
+        <button class="ctrl-btn" id="editorExportBtn" title="Save this deck to a .json backup file">⬇ Export</button>
+        <button class="ctrl-btn primary" id="editorStudyBtn">Study This Deck</button>
+      </div>
+    </div>
+
+    <div class="editor-nav">
+      <button class="ctrl-btn" id="editorPrevBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Previous
+      </button>
+      <div class="editor-nav-actions">
+        <button class="ctrl-btn" id="editorAddCardBtn">+ Add Card</button>
+        <button class="ctrl-btn" id="editorClearCardBtn">Clear Card</button>
+        <button class="ctrl-btn danger" id="editorDeleteCardBtn">Delete Card</button>
+      </div>
+      <button class="ctrl-btn" id="editorNextBtn">
+        Next
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="editor-grid">
+      <div class="side-editor" data-side="front">
+        <h3>Front</h3>
+        <div class="type-toggle">
+          <button class="type-btn" data-side="front" data-type="text">Text</button>
+          <button class="type-btn" data-side="front" data-type="image">Image</button>
+        </div>
+        <textarea class="side-textarea" id="frontTextarea" placeholder="Enter the front text..."></textarea>
+        <div class="side-image" id="frontImageArea" style="display:none">
+          <button class="ctrl-btn" id="frontUploadBtn">Upload Image</button>
+          <input type="file" id="frontFileInput" accept="image/*">
+          <img class="side-image-preview" id="frontImagePreview" style="display:none">
+          <button class="ctrl-btn danger" id="frontRemoveImageBtn" style="display:none">Remove Image</button>
+        </div>
+      </div>
+      <div class="side-editor" data-side="back">
+        <h3>Back</h3>
+        <div class="type-toggle">
+          <button class="type-btn" data-side="back" data-type="text">Text</button>
+          <button class="type-btn" data-side="back" data-type="image">Image</button>
+        </div>
+        <textarea class="side-textarea" id="backTextarea" placeholder="Enter the back text..."></textarea>
+        <div class="side-image" id="backImageArea" style="display:none">
+          <button class="ctrl-btn" id="backUploadBtn">Upload Image</button>
+          <input type="file" id="backFileInput" accept="image/*">
+          <img class="side-image-preview" id="backImagePreview" style="display:none">
+          <button class="ctrl-btn danger" id="backRemoveImageBtn" style="display:none">Remove Image</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-preview">
+      <h3>Card Preview</h3>
+      <div class="preview-cards">
+        <div class="preview-face">
+          <span class="preview-label">Front</span>
+          <div class="card-content" id="previewFrontContent"></div>
+        </div>
+        <div class="preview-face">
+          <span class="preview-label">Back</span>
+          <div class="card-content" id="previewBackContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CREATE DECK MODAL ===================== -->
+  <div class="modal-overlay" id="createDeckModal">
+    <div class="modal-card">
+      <h2>Create New Deck</h2>
+      <label for="newDeckName">Deck name</label>
+      <input type="text" id="newDeckName" placeholder="e.g. English Animals" maxlength="60">
+      <label for="newDeckCount">Number of cards</label>
+      <input type="number" id="newDeckCount" min="1" max="300" value="10">
+      <div class="modal-actions">
+        <button class="ctrl-btn" id="cancelCreateDeckBtn">Cancel</button>
+        <button class="ctrl-btn primary" id="confirmCreateDeckBtn">Create Deck</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-tag">Powered by <b>Mouafak Edtech</b> — AI & EdTech Resources for Language Teachers</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     CONTENT SECURITY SHIELD
+     Blocks right-click, text selection, and dev-tool shortcuts.
+     ========================================================= */
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  document.addEventListener('selectstart', function(e){ e.preventDefault(); });
+  document.addEventListener('dragstart', function(e){ e.preventDefault(); });
+  document.addEventListener('copy', function(e){ e.preventDefault(); });
+  document.addEventListener('cut', function(e){ e.preventDefault(); });
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    var blocked =
+      k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'i')) ||
+      (e.ctrlKey && e.shiftKey && (k === 'J' || k === 'j')) ||
+      (e.ctrlKey && e.shiftKey && (k === 'C' || k === 'c')) ||
+      (e.ctrlKey && (k === 'U' || k === 'u')) ||
+      (e.metaKey && e.altKey && (k === 'I' || k === 'i')); // mac inspector
+    if (blocked){ e.preventDefault(); e.stopPropagation(); return false; }
+  });
+
+  /* =========================================================
+     UTILITIES
+     ========================================================= */
+  function uid(){
+    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+
+  function formatDate(iso){
+    try {
+      var dt = new Date(iso);
+      if (isNaN(dt.getTime())) return '';
+      return dt.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) +
+        ' · ' + dt.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return ''; }
+  }
+
+  /* Normalizes a card into { id, front:{type,content}, back:{type,content} }
+     Accepts legacy string-based cards { front:"Go", back:"Went" } too. */
+  function normalizeSide(side){
+    if (side && typeof side === 'object' && ('type' in side || 'content' in side)){
+      return { type: side.type === 'image' ? 'image' : 'text', content: side.content == null ? '' : side.content };
+    }
+    return { type:'text', content: side == null ? '' : String(side) };
+  }
+  function normalizeCard(raw){
+    raw = raw || {};
+    return {
+      id: raw.id || uid(),
+      front: normalizeSide(raw.front),
+      back: normalizeSide(raw.back)
+    };
+  }
+
+  /* =========================================================
+     STORAGE — IndexedDB (preferred) with localStorage fallback.
+     Decks (including embedded Base64 images) persist offline.
+     ========================================================= */
+  var DB_NAME = 'MouafakFlashcardsDB';
+  var DB_VERSION = 1;
+  var STORE_NAME = 'decks';
+  var LS_KEY = 'mouafakDecks';
+  var useIndexedDB = !!window.indexedDB;
+  var dbPromise = null;
+
+  function openDatabase(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function(resolve, reject){
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)){
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = function(e){ resolve(e.target.result); };
+      req.onerror = function(e){ reject(e.target.error); };
+    });
+    return dbPromise;
+  }
+
+  function idbGetAll(){
+    return openDatabase().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(STORE_NAME, 'readonly');
+        var req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = function(){ resolve(req.result || []); };
+        req.onerror = function(){ reject(req.error); };
+      });
+    });
+  }
+
+  function idbPut(deckObj){
+    return openDatabase().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(deckObj);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ reject(tx.error); };
+      });
+    });
+  }
+
+  function idbDelete(id){
+    return openDatabase().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ reject(tx.error); };
+      });
+    });
+  }
+
+  function lsGetAll(){
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      return Promise.resolve(raw ? JSON.parse(raw) : []);
+    } catch(e){ return Promise.resolve([]); }
+  }
+
+  function lsSaveAll(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(decks)); }
+    catch(e){ console.error('localStorage save failed', e); }
+    return Promise.resolve();
+  }
+
+  function loadAllDecks(){
+    if (useIndexedDB){
+      return idbGetAll().catch(function(err){
+        console.error('IndexedDB unavailable, falling back to localStorage', err);
+        useIndexedDB = false;
+        return lsGetAll();
+      });
+    }
+    return lsGetAll();
+  }
+
+  function persistDeck(deckObj){
+    if (useIndexedDB){
+      idbPut(deckObj).catch(function(err){
+        console.error('IndexedDB save failed, falling back to localStorage', err);
+        useIndexedDB = false;
+        lsSaveAll();
+      });
+    } else {
+      lsSaveAll();
+    }
+  }
+
+  function removeDeckFromStorage(id){
+    if (useIndexedDB){
+      idbDelete(id).catch(function(err){ console.error('IndexedDB delete failed', err); });
+    } else {
+      lsSaveAll();
+    }
+  }
+
+  /* =========================================================
+     APP STATE
+     ========================================================= */
+  var DEFAULT_DECK = [
+    { front: "Go",     back: "Went" },
+    { front: "Eat",    back: "Ate" },
+    { front: "See",    back: "Saw" },
+    { front: "Take",   back: "Took" },
+    { front: "Write",  back: "Wrote" },
+    { front: "Speak",  back: "Spoke" },
+    { front: "Break",  back: "Broke" },
+    { front: "Begin",  back: "Began" },
+    { front: "Choose", back: "Chose" },
+    { front: "Drive",  back: "Drove" }
+  ].map(normalizeCard);
+
+  var deck = DEFAULT_DECK.slice();     // cards currently in study mode
+  var index = 0;
+  var flipped = false;
+  var answers = {};                    // index -> 'know' | 'miss'
+
+  var decks = [];                      // all saved decks (deck management)
+  var currentDeckId = null;            // deck currently open in the editor
+  var editorCardIndex = 0;
+  var saveTimer = null;
+
+  var els = {
+    card: document.getElementById('card'),
+    frontContent: document.getElementById('frontContent'),
+    backContent: document.getElementById('backContent'),
+    curNum: document.getElementById('curNum'),
+    totalNum: document.getElementById('totalNum'),
+    progressFill: document.getElementById('progressFill'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    flipBtn: document.getElementById('flipBtn'),
+    knowBtn: document.getElementById('knowBtn'),
+    missBtn: document.getElementById('missBtn'),
+    stage: document.getElementById('stage'),
+    controls: document.querySelector('.controls'),
+    reportOverlay: document.getElementById('reportOverlay'),
+    scoreCircle: document.getElementById('scoreCircle'),
+    scoreNum: document.getElementById('scoreNum'),
+    knownCountEl: document.getElementById('knownCountEl'),
+    missedCountEl: document.getElementById('missedCountEl'),
+    restartBtn: document.getElementById('restartBtn'),
+    importAgainBtn: document.getElementById('importAgainBtn'),
+    importBtn: document.getElementById('importBtn'),
+    fileInput: document.getElementById('fileInput'),
+    lessonName: document.getElementById('lessonName'),
+
+    studyView: document.getElementById('studyView'),
+    decksView: document.getElementById('decksView'),
+    editorView: document.getElementById('editorView'),
+    navDecksBtn: document.getElementById('navDecksBtn'),
+
+    decksList: document.getElementById('decksList'),
+    decksEmpty: document.getElementById('decksEmpty'),
+    createDeckBtn: document.getElementById('createDeckBtn'),
+    exportAllDecksBtn: document.getElementById('exportAllDecksBtn'),
+    importDecksBtn: document.getElementById('importDecksBtn'),
+    importDecksInput: document.getElementById('importDecksInput'),
+    editorExportBtn: document.getElementById('editorExportBtn'),
+    createDeckModal: document.getElementById('createDeckModal'),
+    newDeckName: document.getElementById('newDeckName'),
+    newDeckCount: document.getElementById('newDeckCount'),
+    cancelCreateDeckBtn: document.getElementById('cancelCreateDeckBtn'),
+    confirmCreateDeckBtn: document.getElementById('confirmCreateDeckBtn'),
+
+    editorBackBtn: document.getElementById('editorBackBtn'),
+    editorDeckName: document.getElementById('editorDeckName'),
+    editorCurNum: document.getElementById('editorCurNum'),
+    editorTotalNum: document.getElementById('editorTotalNum'),
+    editorStudyBtn: document.getElementById('editorStudyBtn'),
+    editorPrevBtn: document.getElementById('editorPrevBtn'),
+    editorNextBtn: document.getElementById('editorNextBtn'),
+    editorAddCardBtn: document.getElementById('editorAddCardBtn'),
+    editorClearCardBtn: document.getElementById('editorClearCardBtn'),
+    editorDeleteCardBtn: document.getElementById('editorDeleteCardBtn'),
+
+    frontTextarea: document.getElementById('frontTextarea'),
+    backTextarea: document.getElementById('backTextarea'),
+    frontImageArea: document.getElementById('frontImageArea'),
+    backImageArea: document.getElementById('backImageArea'),
+    frontUploadBtn: document.getElementById('frontUploadBtn'),
+    backUploadBtn: document.getElementById('backUploadBtn'),
+    frontFileInput: document.getElementById('frontFileInput'),
+    backFileInput: document.getElementById('backFileInput'),
+    frontImagePreview: document.getElementById('frontImagePreview'),
+    backImagePreview: document.getElementById('backImagePreview'),
+    frontRemoveImageBtn: document.getElementById('frontRemoveImageBtn'),
+    backRemoveImageBtn: document.getElementById('backRemoveImageBtn'),
+    previewFrontContent: document.getElementById('previewFrontContent'),
+    previewBackContent: document.getElementById('previewBackContent')
+  };
+
+  /* =========================================================
+     STUDY MODE (generalized to support text + image sides)
+     ========================================================= */
+  function renderFace(container, side){
+    container.innerHTML = '';
+    var hasContent = side && side.content && String(side.content).trim() !== '';
+    if (!hasContent){
+      var ph = document.createElement('div');
+      ph.className = 'content-placeholder';
+      ph.textContent = 'No content';
+      container.appendChild(ph);
+      return;
+    }
+    if (side.type === 'image'){
+      var img = document.createElement('img');
+      img.className = 'card-img';
+      img.src = side.content;
+      img.alt = 'Card image';
+      container.appendChild(img);
+    } else {
+      var div = document.createElement('div');
+      div.className = (container === els.frontContent) ? 'word' : 'meaning';
+      div.textContent = side.content;
+      container.appendChild(div);
+    }
+  }
+
+  function render(){
+    var card = deck[index];
+    renderFace(els.frontContent, card.front);
+    renderFace(els.backContent, card.back);
+    els.curNum.textContent = index + 1;
+    els.totalNum.textContent = deck.length;
+    els.progressFill.style.width = (((index) / deck.length) * 100) + '%';
+    els.prevBtn.disabled = (index === 0);
+    els.card.classList.remove('flipped');
+    flipped = false;
+  }
+
+  function flipCard(){
+    flipped = !flipped;
+    els.card.classList.toggle('flipped', flipped);
+  }
+
+  function goTo(newIndex){
+    if (newIndex < 0 || newIndex >= deck.length) return;
+    index = newIndex;
+    render();
+  }
+
+  function recordAnswer(type){
+    answers[index] = type;
+    if (index === deck.length - 1){
+      showReport();
+    } else {
+      goTo(index + 1);
+    }
+  }
+
+  function showReport(){
+    var known = 0, missed = 0;
+    deck.forEach(function(_, i){
+      if (answers[i] === 'know') known++;
+      else if (answers[i] === 'miss') missed++;
+    });
+    var answered = known + missed;
+    var pct = answered > 0 ? Math.round((known / answered) * 100) : 0;
+
+    els.knownCountEl.textContent = known;
+    els.missedCountEl.textContent = missed;
+    els.scoreNum.textContent = pct + '%';
+
+    var circumference = 452;
+    var offset = circumference - (circumference * pct / 100);
+    els.scoreCircle.style.transition = 'stroke-dashoffset 1s ease';
+    requestAnimationFrame(function(){
+      els.scoreCircle.style.strokeDashoffset = offset;
+    });
+
+    els.progressFill.style.width = '100%';
+    els.stage.style.display = 'none';
+    els.controls.style.display = 'none';
+    els.reportOverlay.classList.add('show');
+  }
+
+  function hideReport(){
+    els.reportOverlay.classList.remove('show');
+    els.stage.style.display = 'flex';
+    els.controls.style.display = 'flex';
+  }
+
+  function resetDeck(newDeck, label){
+    deck = newDeck.length ? newDeck : DEFAULT_DECK.slice();
+    index = 0;
+    answers = {};
+    if (label) els.lessonName.textContent = label;
+    hideReport();
+    render();
+  }
+
+  function loadDeckForStudy(deckObj){
+    if (!deckObj.cards || deckObj.cards.length === 0){
+      alert('This deck has no cards yet. Add cards to it first in the editor.');
+      return;
+    }
+    resetDeck(deckObj.cards.map(normalizeCard), deckObj.name);
+  }
+
+  /* ---------- study events ---------- */
+  els.card.addEventListener('click', flipCard);
+  els.flipBtn.addEventListener('click', flipCard);
+  els.prevBtn.addEventListener('click', function(){ goTo(index - 1); });
+  els.nextBtn.addEventListener('click', function(){ goTo(index + 1); });
+  els.knowBtn.addEventListener('click', function(e){ e.stopPropagation(); recordAnswer('know'); });
+  els.missBtn.addEventListener('click', function(e){ e.stopPropagation(); recordAnswer('miss'); });
+  els.restartBtn.addEventListener('click', function(){ resetDeck(deck, null); });
+
+  els.importBtn.addEventListener('click', function(){ els.fileInput.click(); });
+  els.importAgainBtn.addEventListener('click', function(){ els.fileInput.click(); });
+
+  els.fileInput.addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var text = evt.target.result;
+      var lines = text.split(/\r?\n/);
+      var newDeck = [];
+      lines.forEach(function(line){
+        if (!line.trim()) return;
+        var parts = line.split('=');
+        if (parts.length >= 2){
+          var front = parts[0].trim();
+          var back = parts.slice(1).join('=').trim();
+          if (front && back) newDeck.push(normalizeCard({ front: front, back: back }));
+        }
+      });
+      if (newDeck.length === 0){
+        alert('No valid lines found. Please use the format:\nWord = Meaning');
+        return;
+      }
+      var label = file.name.replace(/\.txt$/i, '');
+      showView('study');
+      resetDeck(newDeck, label);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  /* keyboard shortcuts for classroom use (study mode only) */
+  document.addEventListener('keydown', function(e){
+    if (els.studyView.style.display === 'none') return;
+    if (e.key === 'ArrowRight') goTo(index + 1);
+    if (e.key === 'ArrowLeft') goTo(index - 1);
+    if (e.key === ' '){ e.preventDefault(); flipCard(); }
+  });
+
+  /* =========================================================
+     VIEW SWITCHING
+     ========================================================= */
+  function showView(name){
+    els.studyView.style.display = (name === 'study') ? '' : 'none';
+    els.decksView.style.display = (name === 'decks') ? '' : 'none';
+    els.editorView.style.display = (name === 'editor') ? '' : 'none';
+    els.navDecksBtn.classList.toggle('active', name === 'decks' || name === 'editor');
+    if (name === 'decks') renderDecksList();
+  }
+
+  els.navDecksBtn.addEventListener('click', function(){ showView('decks'); });
+
+  /* =========================================================
+     DECK MANAGEMENT — My Decks view
+     ========================================================= */
+  function getDeckById(id){
+    return decks.find(function(d){ return d.id === id; });
+  }
+
+  function renderDecksList(){
+    els.decksList.innerHTML = '';
+    if (decks.length === 0){
+      els.decksEmpty.style.display = 'block';
+      els.decksList.style.display = 'none';
+      return;
+    }
+    els.decksEmpty.style.display = 'none';
+    els.decksList.style.display = 'grid';
+
+    var sorted = decks.slice().sort(function(a, b){
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+
+    sorted.forEach(function(d){
+      var item = document.createElement('div');
+      item.className = 'deck-item';
+      item.setAttribute('data-id', d.id);
+      var count = d.cards ? d.cards.length : 0;
+      item.innerHTML =
+        '<div class="deck-item-info">' +
+          '<h3>' + escapeHtml(d.name) + '</h3>' +
+          '<p>' + count + ' card' + (count === 1 ? '' : 's') + ' · Updated ' + escapeHtml(formatDate(d.updatedAt)) + '</p>' +
+        '</div>' +
+        '<div class="deck-item-actions">' +
+          '<button class="ctrl-btn primary" data-action="study">Study</button>' +
+          '<button class="ctrl-btn" data-action="edit">Edit Cards</button>' +
+          '<button class="ctrl-btn" data-action="rename">Rename</button>' +
+          '<button class="ctrl-btn" data-action="duplicate">Duplicate</button>' +
+          '<button class="ctrl-btn" data-action="export">⬇ Export</button>' +
+          '<button class="ctrl-btn danger" data-action="delete">Delete</button>' +
+        '</div>';
+      els.decksList.appendChild(item);
+    });
+  }
+
+  els.decksList.addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    var item = e.target.closest('.deck-item');
+    if (!item) return;
+    var id = item.getAttribute('data-id');
+    var deckObj = getDeckById(id);
+    if (!deckObj) return;
+    var action = btn.getAttribute('data-action');
+
+    if (action === 'study'){
+      loadDeckForStudy(deckObj);
+      showView('study');
+    } else if (action === 'edit'){
+      openEditor(id);
+    } else if (action === 'rename'){
+      var newName = prompt('Rename deck:', deckObj.name);
+      if (newName !== null && newName.trim() !== ''){
+        deckObj.name = newName.trim();
+        deckObj.updatedAt = new Date().toISOString();
+        persistDeck(deckObj);
+        renderDecksList();
+      }
+    } else if (action === 'export'){
+      exportDeck(deckObj);
+    } else if (action === 'duplicate'){
+      var now = new Date().toISOString();
+      var copy = JSON.parse(JSON.stringify(deckObj));
+      copy.id = uid();
+      copy.name = deckObj.name + ' (Copy)';
+      copy.createdAt = now;
+      copy.updatedAt = now;
+      copy.cards.forEach(function(c){ c.id = uid(); });
+      decks.push(copy);
+      persistDeck(copy);
+      renderDecksList();
+    } else if (action === 'delete'){
+      if (confirm('Delete "' + deckObj.name + '"? This cannot be undone.')){
+        decks = decks.filter(function(d){ return d.id !== id; });
+        removeDeckFromStorage(id);
+        renderDecksList();
+      }
+    }
+  });
+
+  /* =========================================================
+     EXPORT / IMPORT — save decks to a .json file for later use
+     (backup, transfer between devices/browsers, sharing).
+     ========================================================= */
+  function slugifyFilename(name){
+    var s = (name || 'deck').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return s || 'deck';
+  }
+
+  function downloadJSON(data, filename){
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function exportDeck(deckObj){
+    downloadJSON(
+      { mouafakFlashcardsExport: true, type: 'deck', exportedAt: new Date().toISOString(), deck: deckObj },
+      'flashcard-deck-' + slugifyFilename(deckObj.name) + '.json'
+    );
+  }
+
+  function exportAllDecks(){
+    if (decks.length === 0){
+      alert('You have no decks to export yet. Create a deck first.');
+      return;
+    }
+    downloadJSON(
+      { mouafakFlashcardsExport: true, type: 'deck-collection', exportedAt: new Date().toISOString(), decks: decks },
+      'mouafak-flashcard-decks-backup-' + slugifyFilename(new Date().toISOString().slice(0,10)) + '.json'
+    );
+  }
+
+  /* Accepts a single-deck export, a multi-deck backup, or a raw deck/array
+     of decks (in case a file was hand-edited) and normalizes everything. */
+  function extractDecksFromImportedData(data){
+    var rawDecks = [];
+    if (Array.isArray(data)){
+      rawDecks = data;
+    } else if (data && data.type === 'deck-collection' && Array.isArray(data.decks)){
+      rawDecks = data.decks;
+    } else if (data && data.type === 'deck' && data.deck){
+      rawDecks = [data.deck];
+    } else if (data && Array.isArray(data.cards)){
+      rawDecks = [data];
+    }
+    return rawDecks
+      .filter(function(d){ return d && typeof d === 'object'; })
+      .map(function(d){
+        var now = new Date().toISOString();
+        return {
+          id: uid(), // always assign a fresh id to avoid clobbering existing decks
+          name: (d.name && String(d.name).trim()) ? String(d.name).trim() : 'Imported Deck',
+          createdAt: d.createdAt || now,
+          updatedAt: now,
+          cards: Array.isArray(d.cards) ? d.cards.map(normalizeCard) : []
+        };
+      });
+  }
+
+  function importDecksFromFile(file){
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var parsed;
+      try {
+        parsed = JSON.parse(evt.target.result);
+      } catch(err){
+        alert('This file is not a valid flashcard backup (invalid JSON).');
+        return;
+      }
+      var imported = extractDecksFromImportedData(parsed);
+      if (imported.length === 0){
+        alert('No valid decks were found in that file.');
+        return;
+      }
+      imported.forEach(function(d){
+        decks.push(d);
+        persistDeck(d);
+      });
+      renderDecksList();
+      alert('Imported ' + imported.length + ' deck' + (imported.length === 1 ? '' : 's') + ' successfully.');
+    };
+    reader.readAsText(file);
+  }
+
+  els.exportAllDecksBtn.addEventListener('click', exportAllDecks);
+  els.importDecksBtn.addEventListener('click', function(){ els.importDecksInput.click(); });
+  els.importDecksInput.addEventListener('change', function(e){
+    importDecksFromFile(e.target.files[0]);
+    e.target.value = '';
+  });
+  els.editorExportBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (d) exportDeck(d);
+  });
+
+  /* ---------- create deck modal ---------- */
+  els.createDeckBtn.addEventListener('click', function(){
+    els.newDeckName.value = '';
+    els.newDeckCount.value = 10;
+    els.createDeckModal.classList.add('show');
+    els.newDeckName.focus();
+  });
+  els.cancelCreateDeckBtn.addEventListener('click', function(){
+    els.createDeckModal.classList.remove('show');
+  });
+  els.createDeckModal.addEventListener('click', function(e){
+    if (e.target === els.createDeckModal) els.createDeckModal.classList.remove('show');
+  });
+  els.confirmCreateDeckBtn.addEventListener('click', function(){
+    var name = els.newDeckName.value.trim() || 'Untitled Deck';
+    var count = parseInt(els.newDeckCount.value, 10);
+    if (!count || count < 1) count = 1;
+    if (count > 300) count = 300;
+
+    var now = new Date().toISOString();
+    var cards = [];
+    for (var i = 0; i < count; i++){
+      cards.push({ id: uid(), front: { type:'text', content:'' }, back: { type:'text', content:'' } });
+    }
+    var newDeck = { id: uid(), name: name, createdAt: now, updatedAt: now, cards: cards };
+    decks.push(newDeck);
+    persistDeck(newDeck);
+    els.createDeckModal.classList.remove('show');
+    openEditor(newDeck.id);
+  });
+
+  /* =========================================================
+     CARD EDITOR
+     ========================================================= */
+  function getCurrentDeck(){
+    return getDeckById(currentDeckId);
+  }
+
+  function touchCurrentDeck(){
+    var d = getCurrentDeck();
+    if (d) d.updatedAt = new Date().toISOString();
+    return d;
+  }
+
+  function scheduleSave(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){ persistDeck(d); }, 400);
+  }
+
+  function openEditor(deckId){
+    currentDeckId = deckId;
+    editorCardIndex = 0;
+    showView('editor');
+    renderEditor();
+  }
+
+  function renderEditor(){
+    var d = getCurrentDeck();
+    if (!d){ showView('decks'); return; }
+    if (editorCardIndex >= d.cards.length) editorCardIndex = d.cards.length - 1;
+    if (editorCardIndex < 0) editorCardIndex = 0;
+    var card = d.cards[editorCardIndex];
+
+    els.editorDeckName.textContent = d.name;
+    els.editorCurNum.textContent = d.cards.length ? (editorCardIndex + 1) : 0;
+    els.editorTotalNum.textContent = d.cards.length;
+    els.editorPrevBtn.disabled = (editorCardIndex === 0);
+    els.editorNextBtn.disabled = (editorCardIndex >= d.cards.length - 1);
+    els.editorDeleteCardBtn.disabled = (d.cards.length <= 1);
+
+    renderSideEditor('front', card.front);
+    renderSideEditor('back', card.back);
+    updatePreview(card);
+  }
+
+  function renderSideEditor(side, sideData){
+    var textarea = (side === 'front') ? els.frontTextarea : els.backTextarea;
+    var imageArea = (side === 'front') ? els.frontImageArea : els.backImageArea;
+    var preview = (side === 'front') ? els.frontImagePreview : els.backImagePreview;
+    var removeBtn = (side === 'front') ? els.frontRemoveImageBtn : els.backRemoveImageBtn;
+    var toggleBtns = document.querySelectorAll('.type-btn[data-side="' + side + '"]');
+
+    toggleBtns.forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-type') === sideData.type);
+    });
+
+    if (sideData.type === 'image'){
+      textarea.style.display = 'none';
+      imageArea.style.display = 'flex';
+      if (sideData.content){
+        preview.src = sideData.content;
+        preview.style.display = 'block';
+        removeBtn.style.display = 'inline-flex';
+      } else {
+        preview.style.display = 'none';
+        removeBtn.style.display = 'none';
+      }
+    } else {
+      textarea.style.display = 'block';
+      imageArea.style.display = 'none';
+      textarea.value = sideData.content || '';
+    }
+  }
+
+  function updatePreview(card){
+    renderFace(els.previewFrontContent, card.front);
+    renderFace(els.previewBackContent, card.back);
+  }
+
+  function setSideType(side, type){
+    var d = getCurrentDeck();
+    if (!d) return;
+    var card = d.cards[editorCardIndex];
+    if (card[side].type !== type){
+      card[side] = { type: type, content: '' };
+      touchCurrentDeck();
+      renderEditor();
+      scheduleSave();
+    }
+  }
+
+  document.querySelectorAll('.type-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setSideType(btn.getAttribute('data-side'), btn.getAttribute('data-type'));
+    });
+  });
+
+  els.frontTextarea.addEventListener('input', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    d.cards[editorCardIndex].front.content = els.frontTextarea.value;
+    touchCurrentDeck();
+    updatePreview(d.cards[editorCardIndex]);
+    scheduleSave();
+  });
+  els.backTextarea.addEventListener('input', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    d.cards[editorCardIndex].back.content = els.backTextarea.value;
+    touchCurrentDeck();
+    updatePreview(d.cards[editorCardIndex]);
+    scheduleSave();
+  });
+
+  function handleImageUpload(side, file){
+    if (!file) return;
+    if (file.type.indexOf('image/') !== 0){
+      alert('Please choose an image file.');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var d = getCurrentDeck();
+      if (!d) return;
+      d.cards[editorCardIndex][side] = { type:'image', content: evt.target.result };
+      touchCurrentDeck();
+      renderEditor();
+      scheduleSave();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  els.frontUploadBtn.addEventListener('click', function(){ els.frontFileInput.click(); });
+  els.backUploadBtn.addEventListener('click', function(){ els.backFileInput.click(); });
+  els.frontFileInput.addEventListener('change', function(e){
+    handleImageUpload('front', e.target.files[0]);
+    e.target.value = '';
+  });
+  els.backFileInput.addEventListener('change', function(e){
+    handleImageUpload('back', e.target.files[0]);
+    e.target.value = '';
+  });
+  els.frontRemoveImageBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    d.cards[editorCardIndex].front.content = '';
+    touchCurrentDeck();
+    renderEditor();
+    scheduleSave();
+  });
+  els.backRemoveImageBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    d.cards[editorCardIndex].back.content = '';
+    touchCurrentDeck();
+    renderEditor();
+    scheduleSave();
+  });
+
+  els.editorPrevBtn.addEventListener('click', function(){
+    if (editorCardIndex > 0){ editorCardIndex--; renderEditor(); }
+  });
+  els.editorNextBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (d && editorCardIndex < d.cards.length - 1){ editorCardIndex++; renderEditor(); }
+  });
+
+  els.editorAddCardBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    d.cards.push({ id: uid(), front: { type:'text', content:'' }, back: { type:'text', content:'' } });
+    editorCardIndex = d.cards.length - 1;
+    touchCurrentDeck();
+    renderEditor();
+    scheduleSave();
+  });
+
+  els.editorClearCardBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    if (!confirm('Clear the content of this card?')) return;
+    d.cards[editorCardIndex] = { id: d.cards[editorCardIndex].id, front:{type:'text',content:''}, back:{type:'text',content:''} };
+    touchCurrentDeck();
+    renderEditor();
+    scheduleSave();
+  });
+
+  els.editorDeleteCardBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d || d.cards.length <= 1) return;
+    if (!confirm('Delete this card? This cannot be undone.')) return;
+    d.cards.splice(editorCardIndex, 1);
+    if (editorCardIndex >= d.cards.length) editorCardIndex = d.cards.length - 1;
+    touchCurrentDeck();
+    renderEditor();
+    scheduleSave();
+  });
+
+  els.editorStudyBtn.addEventListener('click', function(){
+    var d = getCurrentDeck();
+    if (!d) return;
+    loadDeckForStudy(d);
+    showView('study');
+  });
+
+  els.editorBackBtn.addEventListener('click', function(){
+    showView('decks');
+  });
+
+  /* =========================================================
+     INIT
+     ========================================================= */
+  render();
+  loadAllDecks().then(function(loaded){
+    decks = (loaded || []).map(function(d){
+      d.cards = (d.cards || []).map(normalizeCard);
+      return d;
+    });
+  }).catch(function(err){
+    console.error('Failed to load saved decks', err);
+    decks = [];
+  });
+})();
+</script>
+
+</body>
+</html>
