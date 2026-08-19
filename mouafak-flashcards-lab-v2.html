@@ -636,13 +636,12 @@
     <div class="card-scene">
       <div class="card" id="card">
         <div class="face front">
-          <span class="face-tag">Word</span>
+          <span class="face-tag">Front</span>
           <svg class="face-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h.01M15 9h.01M9 15c1 1 5 1 6 0"/></svg>
           <div class="card-content" id="frontContent"></div>
-          <div class="hint">Tap the card to reveal the meaning</div>
         </div>
         <div class="face back">
-          <span class="face-tag blue">Meaning</span>
+          <span class="face-tag blue">Back</span>
           <div class="card-content" id="backContent"></div>
           <div class="feedback-row">
             <button class="fb-btn know" id="knowBtn">I Knew It 👍</button>
@@ -1225,7 +1224,7 @@
         }
       });
       if (newDeck.length === 0){
-        alert('No valid lines found. Please use the format:\nWord = Meaning');
+        alert('No valid lines found. Please use the format:\nFront = Back');
         return;
       }
       var label = file.name.replace(/\.txt$/i, '');
@@ -1595,22 +1594,78 @@
     scheduleSave();
   });
 
+  /* Resizes/compresses an uploaded image via an off-screen canvas before
+     storing it, so decks (and their exports) stay reasonably sized when
+     photos are uploaded straight from a phone camera. */
+  var MAX_IMAGE_DIMENSION = 900; // px, longest side
+  var JPEG_QUALITY = 0.82;
+
+  function resizeImageFile(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(evt){
+        var img = new Image();
+        img.onload = function(){
+          var width = img.naturalWidth || img.width;
+          var height = img.naturalHeight || img.height;
+          var scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(width, height));
+          var targetW = Math.max(1, Math.round(width * scale));
+          var targetH = Math.max(1, Math.round(height * scale));
+
+          var canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+
+          // Keep transparency for PNG/GIF sources, otherwise compress as JPEG.
+          var keepPng = (file.type === 'image/png' || file.type === 'image/gif');
+          var outputType = keepPng ? 'image/png' : 'image/jpeg';
+          var dataUrl = keepPng ? canvas.toDataURL(outputType) : canvas.toDataURL(outputType, JPEG_QUALITY);
+          resolve(dataUrl);
+        };
+        img.onerror = function(){ reject(new Error('Could not decode image.')); };
+        img.src = evt.target.result;
+      };
+      reader.onerror = function(){ reject(reader.error); };
+      reader.readAsDataURL(file);
+    });
+  }
+
   function handleImageUpload(side, file){
     if (!file) return;
     if (file.type.indexOf('image/') !== 0){
       alert('Please choose an image file.');
       return;
     }
-    var reader = new FileReader();
-    reader.onload = function(evt){
+    var uploadBtn = (side === 'front') ? els.frontUploadBtn : els.backUploadBtn;
+    var originalLabel = uploadBtn.textContent;
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Processing…';
+
+    resizeImageFile(file).then(function(dataUrl){
       var d = getCurrentDeck();
       if (!d) return;
-      d.cards[editorCardIndex][side] = { type:'image', content: evt.target.result };
+      d.cards[editorCardIndex][side] = { type:'image', content: dataUrl };
       touchCurrentDeck();
       renderEditor();
       scheduleSave();
-    };
-    reader.readAsDataURL(file);
+    }).catch(function(err){
+      console.error('Image resize failed, storing original file instead', err);
+      var reader = new FileReader();
+      reader.onload = function(evt){
+        var d = getCurrentDeck();
+        if (!d) return;
+        d.cards[editorCardIndex][side] = { type:'image', content: evt.target.result };
+        touchCurrentDeck();
+        renderEditor();
+        scheduleSave();
+      };
+      reader.readAsDataURL(file);
+    }).finally(function(){
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = originalLabel;
+    });
   }
 
   els.frontUploadBtn.addEventListener('click', function(){ els.frontFileInput.click(); });
